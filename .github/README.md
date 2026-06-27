@@ -1,6 +1,9 @@
 <div align="center">
 
 # ✧ C A E L E S T I A <img src="assets/caelestia.svg" width="35" align="top"> ✧
+
+<p align="center"> <b>v2.0.0</b> </p>
+
 ### A KDE adaptation of the celestial aesthetic
 
 ![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793d1?logo=arch-linux&logoColor=white&style=for-the-badge)
@@ -105,6 +108,19 @@
 
 </details>
 
+<details>
+  <summary><b> 🌠 v2.0.0 new features</b></summary>
+  <br/>
+
+  - 🌙 **Bar**: MacOS-style app dock, Configurable Panel Position, Material workspace icons, DND toggle, and a live drag-and-drop components editor.
+  - ☄️ **Launchers**: Emoji Picker, Clipboard History, Window Switcher, and Hyprland Keybinds.
+  - 🌌 **Wallpapers**: GIF/video support with auto-pause, plus Wallhaven integration.
+  - 🎵 **Bad Apple Easter Egg**: A custom shader effect that plays Bad Apple directly through the shell's UI material by masking the background and preserving the shell's native translucent blur and shadow effects.
+  - 🔭 **Dashboard**: Developer console terminal tab with history and autocomplete.
+  - 🪐 **Desktop**: Floating lyrics, Sound visualizer, Shimeji pets, dynamic wallpaper recoloring, and Bezel Mode.
+  - 🧠 **Ai**: Added Ai assistant in notification panel with ollama support.
+
+</details>
 
 <div align="center">
     <h2>✦ Visuals ✦</h2>
@@ -264,6 +280,7 @@ Then rebuild the shell by running setup.sh again.
 - **[Caelestia](https://github.com/caelestia)** for the incredible, otherworldly design language and the original dotfiles.
 - **[ladybug-me](https://github.com/ladybug-me)** for meticulously adapting the dotfiles to KDE Plasma.
 - **[0xSolanaceae](https://github.com/0xSolanaceae)** for contributing the uninstallation feature.
+- **[dim-ghub](https://github.com/dim-ghub/caelestia-shell)** for the added features in v2.0.0 from his fork.
 - **[Quickshell](https://quickshell.outfoxxed.me/)** — The robust Qt widget framework.
 - **[Darkly](https://github.com/vinceliuice/Darkly)** — For the gorgeous KDE theme base.
 - **[KDE Plasma](https://kde.org/plasma/)** — The powerhouse desktop environment.

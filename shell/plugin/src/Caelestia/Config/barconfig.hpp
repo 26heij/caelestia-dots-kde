@@ -47,10 +47,12 @@ class BarWorkspaces : public ConfigObject {
     CONFIG_PROPERTY(bool, showWindowsOnSpecialWorkspaces, true)
     CONFIG_PROPERTY(int, maxWindowIcons, 5)
     CONFIG_PROPERTY(bool, activeTrail, false)
+    CONFIG_PROPERTY(bool, monitorCenter, false)
     CONFIG_GLOBAL_PROPERTY(bool, perMonitorWorkspaces, true)
-    CONFIG_PROPERTY(QString, label, u"  "_s)
-    CONFIG_PROPERTY(QString, occupiedLabel, u"󰮯"_s)
-    CONFIG_PROPERTY(QString, activeLabel, u"󰮯"_s)
+    CONFIG_PROPERTY(bool, useIcon, true)
+    CONFIG_PROPERTY(QString, label, u" "_s)
+    CONFIG_PROPERTY(QString, occupiedLabel, u" 󰮯"_s)
+    CONFIG_PROPERTY(QString, activeLabel, u" 󰮯"_s)
     CONFIG_PROPERTY(QString, capitalisation, u"preserve"_s)
     CONFIG_GLOBAL_PROPERTY(QVariantList, specialWorkspaceIcons)
     CONFIG_GLOBAL_PROPERTY(QVariantList, windowIcons,
@@ -58,6 +60,7 @@ class BarWorkspaces : public ConfigObject {
             { u"regex"_s, u"steam(_app_(default|[0-9]+))?"_s },
             { u"icon"_s, u"sports_esports"_s },
         }) })
+    CONFIG_GLOBAL_PROPERTY(QVariantList, wsIcons)
 
 public:
     explicit BarWorkspaces(QObject* parent = nullptr)
@@ -103,7 +106,10 @@ class BarStatus : public ConfigObject {
     CONFIG_PROPERTY(bool, showWifi, true)
     CONFIG_PROPERTY(bool, showBluetooth, true)
     CONFIG_PROPERTY(bool, showBattery, true)
+    CONFIG_PROPERTY(bool, showPeripheralBattery, false)
+    CONFIG_PROPERTY(QStringList, peripheralBatteryExcluded)
     CONFIG_PROPERTY(bool, showLockStatus, true)
+    CONFIG_PROPERTY(bool, showNotifications, true)
 
 public:
     explicit BarStatus(QObject* parent = nullptr)
@@ -123,6 +129,29 @@ public:
         : ConfigObject(parent) {}
 };
 
+class BarDock : public ConfigObject {
+    Q_OBJECT
+    QML_ANONYMOUS
+
+    CONFIG_PROPERTY(bool, monitorCenter, true)
+    CONFIG_PROPERTY(bool, recolourIcons, false)
+
+public:
+    explicit BarDock(QObject* parent = nullptr)
+        : ConfigObject(parent) {}
+};
+
+class BarGithub : public ConfigObject {
+    Q_OBJECT
+    QML_ANONYMOUS
+
+    CONFIG_PROPERTY(bool, background, false)
+
+public:
+    explicit BarGithub(QObject* parent = nullptr)
+        : ConfigObject(parent) {}
+};
+
 class BarConfig : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
@@ -130,6 +159,7 @@ class BarConfig : public ConfigObject {
     CONFIG_PROPERTY(bool, persistent, true)
     CONFIG_PROPERTY(bool, showOnHover, true)
     CONFIG_PROPERTY(int, dragThreshold, 20)
+    CONFIG_PROPERTY(QString, position, u"bottom"_s)
     CONFIG_SUBOBJECT(BarScrollActions, scrollActions)
     CONFIG_SUBOBJECT(BarPopouts, popouts)
     CONFIG_SUBOBJECT(BarWorkspaces, workspaces)
@@ -137,13 +167,15 @@ class BarConfig : public ConfigObject {
     CONFIG_SUBOBJECT(BarTray, tray)
     CONFIG_SUBOBJECT(BarStatus, status)
     CONFIG_SUBOBJECT(BarClock, clock)
+    CONFIG_SUBOBJECT(BarDock, dock)
+    CONFIG_SUBOBJECT(BarGithub, github)
     CONFIG_PROPERTY(QVariantList, entries,
         {
             vmap({ { u"id"_s, u"logo"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"workspaces"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"spacer"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"activeWindow"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"spacer"_s }, { u"enabled"_s, true } }),
+            vmap({ { u"id"_s, u"dock"_s }, { u"enabled"_s, true } }),
+            vmap({ { u"id"_s, u"github"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"tray"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"clock"_s }, { u"enabled"_s, true } }),
             vmap({ { u"id"_s, u"statusIcons"_s }, { u"enabled"_s, true } }),
@@ -160,7 +192,9 @@ public:
         , m_activeWindow(new BarActiveWindow(this))
         , m_tray(new BarTray(this))
         , m_status(new BarStatus(this))
-        , m_clock(new BarClock(this)) {}
+        , m_clock(new BarClock(this))
+        , m_dock(new BarDock(this))
+        , m_github(new BarGithub(this)) {}
 };
 
 } // namespace caelestia::config

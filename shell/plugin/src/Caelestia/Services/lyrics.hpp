@@ -52,6 +52,7 @@ public:
 
     [[nodiscard]] Q_INVOKABLE int indexForTime(qreal time) const;
     [[nodiscard]] Q_INVOKABLE qreal timeForIndex(int index) const;
+
     Q_INVOKABLE void setTrack(
         const QString& artist, const QString& title, const QString& album = {}, qreal duration = 0.0);
     Q_INVOKABLE void clearTrack();
@@ -84,16 +85,13 @@ private:
     void tryLocal(int reqId);
     void tryLrclib(int reqId);
     void tryNetEase(int reqId);
-    void tryKugou(int reqId);
     void chainNext(LyricsBackend::Backend just_failed, int reqId);
 
     void searchLrclibCandidates(int reqId);
     void searchNetEaseCandidates(int reqId);
-    void searchKugouCandidates(int reqId);
 
     void fetchLrclibById(const QString& id, int reqId);
     void fetchNetEaseLyricsById(const QString& id, int reqId);
-    void fetchKugouLyricsById(const QString& id, int reqId);
 
     QNetworkReply* getJson(const QUrl& url, const QHash<QByteArray, QByteArray>& headers = {});
     void trackReply(int reqId, QNetworkReply* reply);

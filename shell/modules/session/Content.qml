@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Caelestia
 import Caelestia.Config
+import Caelestia.Services
 import qs.components
 import qs.components.controls
 import qs.components.effects
@@ -23,7 +24,7 @@ Column {
         id: logout
 
         icon: Config.session.icons.logout
-        command: Config.session.commands.logout
+        command: ["sh", "-c", "qdbus6 org.kde.Shutdown /Shutdown org.kde.Shutdown.logout 2>/dev/null"]
 
         KeyNavigation.down: shutdown
 
@@ -63,6 +64,25 @@ Column {
             fillMode: AnimatedImage.PreserveAspectFit
             opacity: Visibilities.isCaelestiaMode ? 0 : 1
             Behavior on opacity { Anim { type: Anim.Standard } }
+            visible: Config.paths.sessionGif !== ""
+        }
+
+        AnimatedImage {
+            anchors.fill: parent
+            sourceSize.width: width * ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1)
+            playing: visible
+            asynchronous: true
+            speed: Config.general.sessionGifSpeed
+            source: Paths.absolutePath("root:/assets/dino.gif")
+            fillMode: AnimatedImage.PreserveAspectFit
+            opacity: Visibilities.isCaelestiaMode ? 1 : 0
+            Behavior on opacity { Anim { type: Anim.Standard } }
+            
+            layer.enabled: true
+            layer.effect: Colouriser {
+                colorizationColor: Colours.palette.m3onSurface
+                sourceColor: "white"
+            }
         }
 
         AnimatedImage {
@@ -108,6 +128,11 @@ Column {
 
         required property list<string> command
 
+        function exec(): void {
+            if (!SessionManager.exec(command))
+                Quickshell.execDetached(command);
+        }
+
         implicitWidth: Tokens.sizes.session.button
         implicitHeight: Tokens.sizes.session.button
 
@@ -115,10 +140,10 @@ Column {
         inactiveOnColour: activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
         radius: pressed ? Tokens.rounding.medium : activeFocus ? Tokens.rounding.extraLarge : Tokens.rounding.largeIncreased
         font: Tokens.font.icon.builders.large.scale(1.3).build()
-        onClicked: Quickshell.execDetached(button.command)
+        onClicked: exec()
 
-        Keys.onEnterPressed: Quickshell.execDetached(button.command)
-        Keys.onReturnPressed: Quickshell.execDetached(button.command)
+        Keys.onEnterPressed: exec()
+        Keys.onReturnPressed: exec()
         Keys.onEscapePressed: root.visibilities.session = false
         Keys.onPressed: event => {
             if (!Config.session.vimKeybinds)

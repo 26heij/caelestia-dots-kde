@@ -9,13 +9,16 @@ Item {
     id: root
 
     required property DrawerVisibilities visibilities
+    property var popouts
+    property var utilities
     readonly property Props props: Props {}
 
     readonly property bool shouldBeActive: visibilities.sidebar && Config.sidebar.enabled
     property real offsetScale: shouldBeActive ? 0 : 1
 
     visible: offsetScale < 1
-    anchors.rightMargin: (-implicitWidth - 5) * offsetScale
+    anchors.leftMargin: Config.bar.position === "right" ? (-implicitWidth - 5) * offsetScale : 0
+    anchors.rightMargin: Config.bar.position !== "right" ? (-implicitWidth - 5) * offsetScale : 0
     implicitWidth: Tokens.sizes.sidebar.width
     opacity: 1 - offsetScale
 
@@ -39,6 +42,8 @@ Item {
             implicitWidth: Tokens.sizes.sidebar.width - content.anchors.leftMargin - content.anchors.margins
             props: root.props
             visibilities: root.visibilities
+            popouts: root.popouts
+            utilities: root.utilities
         }
     }
 }

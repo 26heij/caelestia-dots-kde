@@ -263,11 +263,11 @@ Singleton {
             brightness = value;
 
             if (isAppleDisplay)
-                Quickshell.execDetached(["asdbctl", "set", rounded]);
+                Quickshell.execDetached(["asdbctl", "set", rounded === 0 ? 1 : rounded]);
             else if (isDdc)
-                Quickshell.execDetached(["ddcutil", "-b", busNum, "setvcp", "10", rounded]);
+                Quickshell.execDetached(["ddcutil", "-b", busNum, "setvcp", "10", rounded === 0 ? 1 : rounded]);
             else
-                Quickshell.execDetached(["brightnessctl", "s", `${rounded}%`]);
+                Quickshell.execDetached(["brightnessctl", "s", rounded === 0 ? "1" : `${rounded}%`]);
 
             if (isDdc)
                 timer.restart();

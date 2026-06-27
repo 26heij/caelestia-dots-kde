@@ -50,7 +50,7 @@ PageBase {
                         Layout.alignment: Qt.AlignHCenter
                         text: "hide_image"
                         color: Colours.palette.m3onSurfaceVariant
-                        font: Tokens.font.icon.extraLarge
+                        fontStyle: Tokens.font.icon.extraLarge
                     }
 
                     StyledText {
@@ -158,6 +158,19 @@ PageBase {
             }
 
             IconTextButton {
+                icon: "image_search"
+                text: qsTr("Wallhaven")
+                font: Tokens.font.body.large
+                isRound: true
+                shapeMorph: true
+                type: IconTextButton.Tonal
+                horizontalPadding: Tokens.padding.extraLarge
+                verticalPadding: Tokens.padding.medium
+                disabled: !Config.background.wallpaperEnabled
+                onClicked: root.nState.openSubPage(4) // Wallhaven page
+            }
+
+            IconTextButton {
                 icon: "palette"
                 text: qsTr("Colours")
                 font: Tokens.font.body.large
@@ -170,9 +183,12 @@ PageBase {
             }
         }
 
+        SectionHeader {
+            text: qsTr("Wallpaper")
+        }
+
         ToggleRow {
             Layout.fillWidth: true
-
             first: true
             text: qsTr("Display wallpaper")
             checked: Config.background.wallpaperEnabled
@@ -182,17 +198,145 @@ PageBase {
         ToggleRow {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
             Layout.fillWidth: true
+            text: qsTr("Recolor wallpaper")
+            subtext: qsTr("Tint the wallpaper to match static color schemes")
+            checked: Config.background.wallpaperRecolor
+            onToggled: GlobalConfig.background.wallpaperRecolor = checked
+            enabled: Config.background.wallpaperEnabled
+        }
 
+        SliderRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            icon: ""
+            label: qsTr("Recolor strength")
+            valueLabel: Math.round(value * 100) + "%"
+            value: Config.background.wallpaperRecolorStrength
+            enabled: Config.background.wallpaperRecolor && Config.background.wallpaperEnabled
+            onMoved: v => GlobalConfig.background.wallpaperRecolorStrength = v
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            text: qsTr("Pause video wallpapers")
+            checked: Config.background.videoWallpaperPaused
+            onToggled: GlobalConfig.background.videoWallpaperPaused = checked
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            text: qsTr("Enable video audio")
+            checked: Config.background.videoWallpaperSoundEnabled
+            onToggled: GlobalConfig.background.videoWallpaperSoundEnabled = checked
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            text: qsTr("Pause video on fullscreen")
+            visible: Quickshell.env("XDG_CURRENT_DESKTOP").includes("Hyprland")
+            checked: Config.background.videoWallpaperPauseOnFullscreen
+            onToggled: GlobalConfig.background.videoWallpaperPauseOnFullscreen = checked
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            last: true
+            text: qsTr("Mute video when media plays")
+            checked: Config.background.videoWallpaperMuteOnMedia
+            onToggled: GlobalConfig.background.videoWallpaperMuteOnMedia = checked
+        }
+
+        SectionHeader {
+            text: qsTr("Appearance")
+        }
+
+        ToggleRow {
+            Layout.fillWidth: true
+            first: true
+            text: qsTr("Desktop clock")
+            checked: Config.background.desktopClock.enabled
+            onToggled: GlobalConfig.background.desktopClock.enabled = checked
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            text: qsTr("Desktop lyrics")
+            checked: Config.background.desktopLyrics.enabled
+            onToggled: GlobalConfig.background.desktopLyrics.enabled = checked
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            text: qsTr("Auto-hide lyrics")
+            subtext: qsTr("Hide lyrics when a window is open")
+            checked: Config.background.desktopLyrics.autoHide
+            onToggled: GlobalConfig.background.desktopLyrics.autoHide = checked
+            enabled: Config.background.desktopLyrics.enabled
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            text: qsTr("Background visualiser")
+            checked: Config.background.visualiser.enabled
+            onToggled: GlobalConfig.background.visualiser.enabled = checked
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            text: qsTr("Auto-hide visualiser")
+            subtext: qsTr("Hide visualiser when a window is open")
+            checked: Config.background.visualiser.autoHide
+            onToggled: GlobalConfig.background.visualiser.autoHide = checked
+            enabled: Config.background.visualiser.enabled
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            text: qsTr("Shimeji characters")
+            checked: Config.shimeji.enabled
+            onToggled: GlobalConfig.shimeji.enabled = checked
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            text: qsTr("Bezel mode (Pitch black)")
+            subtext: qsTr("Make the shell pitch black to blend with display bezels")
+            checked: Config.appearance.pitchBlack
+            onToggled: GlobalConfig.appearance.pitchBlack = checked
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            text: qsTr("Islands")
+            subtext: qsTr("Everything appears as its own floating widget (Very Experimental)")
+            checked: GlobalConfig.appearance.islands
+            onToggled: GlobalConfig.appearance.islands = checked
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
             text: qsTr("Transparency")
             subtext: qsTr("Base %1, layers %2").arg(Colours.transparency.base).arg(Colours.transparency.layers)
             checked: Colours.transparency.enabled
             onToggled: GlobalConfig.appearance.transparency.enabled = checked
         }
 
+
         ToggleRow {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
             Layout.fillWidth: true
-
             last: true
             text: qsTr("Dark theme")
             checked: !Colours.light

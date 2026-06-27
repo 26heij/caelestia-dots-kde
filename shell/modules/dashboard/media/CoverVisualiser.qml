@@ -40,15 +40,7 @@ Item {
             id: bar
 
             required property int modelData
-            property real rawValue: Math.max(1e-2, Math.min(1, Audio.cava.values[modelData]))
-            property real value: rawValue
-
-            Behavior on value {
-                NumberAnimation {
-                    duration: 60
-                    easing.type: Easing.OutQuad
-                }
-            }
+            readonly property real value: Math.max(1e-2, Math.min(1, Audio.cava.values[modelData]))
 
             readonly property real angle: modelData * 2 * Math.PI / GlobalConfig.services.visualiserBars
             readonly property real dist: shapeEdgeDist + value * root.maxMagnitude

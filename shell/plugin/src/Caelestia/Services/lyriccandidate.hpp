@@ -14,8 +14,7 @@ public:
         Auto = 0,
         Local,
         LRCLIB,
-        NetEase,
-        Kugou
+        NetEase
     };
     Q_ENUM(Backend)
 

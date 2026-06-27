@@ -83,6 +83,15 @@ Singleton {
         updateAll();
     }
 
+    Timer {
+        interval: 200
+        running: true
+        repeat: true
+        onTriggered: {
+            updateAll();
+        }
+    }
+
     Connections {
         target: Hyprland
 
@@ -99,7 +108,12 @@ Singleton {
         stdout: StdioCollector {
             id: clientsCollector
             onStreamFinished: {
-                root.windowList = JSON.parse(clientsCollector.text)
+                try {
+                    let parsed = JSON.parse(clientsCollector.text);
+                    root.windowList = parsed.filter(w => w.class && !w.class.toLowerCase().includes("quickshell"));
+                } catch(e) {
+                    root.windowList = [];
+                }
                 let tempWinByAddress = {};
                 for (var i = 0; i < root.windowList.length; ++i) {
                     var win = root.windowList[i];

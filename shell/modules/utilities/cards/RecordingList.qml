@@ -11,6 +11,7 @@ import qs.components.containers
 import qs.components.controls
 import qs.services
 import qs.utils
+import Qt.labs.folderlistmodel
 
 ColumnLayout {
     id: root
@@ -54,10 +55,11 @@ ColumnLayout {
     StyledListView {
         id: list
 
-        model: FileSystemModel {
-            path: Paths.recsdir
+        model: FolderListModel {
+            folder: "file://" + Paths.recsdir
             nameFilters: ["recording_*.mp4"]
-            sortReverse: true
+            sortField: FolderListModel.Time
+            sortReversed: false
         }
 
         Layout.fillWidth: true
@@ -72,15 +74,16 @@ ColumnLayout {
         delegate: RowLayout {
             id: recording
 
-            required property FileSystemEntry modelData
-            property string baseName
+            required property string fileBaseName
+            required property string filePath
+
+            property string baseName: fileBaseName
+            property string path: filePath
 
             anchors.left: list.contentItem.left
             anchors.right: list.contentItem.right
             anchors.rightMargin: Tokens.spacing.small
             spacing: Tokens.spacing.extraSmall
-
-            Component.onCompleted: baseName = modelData.baseName
 
             StyledText {
                 Layout.fillWidth: true
@@ -104,7 +107,7 @@ ColumnLayout {
                 onClicked: {
                     root.visibilities.utilities = false;
                     root.visibilities.sidebar = false;
-                    Quickshell.execDetached(["app2unit", "--", ...GlobalConfig.general.apps.playback, recording.modelData.path]);
+                    Quickshell.execDetached([...GlobalConfig.general.apps.playback, recording.path]);
                 }
             }
 
@@ -114,7 +117,7 @@ ColumnLayout {
                 onClicked: {
                     root.visibilities.utilities = false;
                     root.visibilities.sidebar = false;
-                    Quickshell.execDetached(["app2unit", "--", ...GlobalConfig.general.apps.explorer, Paths.recsdir]);
+                    Quickshell.execDetached([...GlobalConfig.general.apps.explorer, Paths.recsdir]);
                 }
             }
 
@@ -123,7 +126,7 @@ ColumnLayout {
                 type: IconButton.Text
                 label.color: Colours.palette.m3error
                 stateLayer.color: Colours.palette.m3error
-                onClicked: root.props.recordingConfirmDelete = recording.modelData.path
+                onClicked: root.props.recordingConfirmDelete = recording.path
             }
         }
 

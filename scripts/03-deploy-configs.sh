@@ -12,12 +12,16 @@ echo "════════════════════════�
 
 mkdir -p "$BACKUP_DIR/config" "$BACKUP_DIR/local"
 
-echo "  Backing up and deploying Caelestia configs..."
-for config in btop fastfetch fish foot hypr kitty micro nvim rofi thunar uwsm zed zen vscode; do
+echo "  Recording previous login shell..."
+getent passwd "$USER" | cut -d: -f7 > "$BACKUP_DIR/previous_shell.txt"
+
+echo "  Backing up the entire ~/.config folder..."
+cp -r "$HOME/.config" "$BACKUP_DIR/" 2>/dev/null || true
+
+echo "  Deploying Caelestia configs..."
+for config in btop fastfetch fish foot hypr kitty micro thunar; do
     if [[ -d "$SRC_DIR/dots/$config" ]]; then
-        # Backup
-        [[ -e "$HOME/.config/$config" ]] && cp -r "$HOME/.config/$config" "$BACKUP_DIR/config/" 2>/dev/null || true
-        # Remove
+        # Remove ((COMMENTED OUT FOR SOME REASON))
         rm -rf "$HOME/.config/$config"
         # Deploy
         cp -r "$SRC_DIR/dots/$config" "$HOME/.config/$config"
@@ -27,14 +31,13 @@ done
 
 # Deploy starship.toml
 if [[ -f "$SRC_DIR/dots/starship.toml" ]]; then
-    [[ -e "$HOME/.config/starship.toml" ]] && cp "$HOME/.config/starship.toml" "$BACKUP_DIR/config/" 2>/dev/null || true
     cp "$SRC_DIR/dots/starship.toml" "$HOME/.config/starship.toml"
     echo "    Deployed: starship.toml"
 fi
 
 # ── Backup Konsole ────────────────────────────────────────────────────────
 echo "  Backing up Konsole config..."
-[[ -f "$HOME/.config/konsolerc" ]] && cp "$HOME/.config/konsolerc" "$BACKUP_DIR/config/" 2>/dev/null || true
+# Note: konsolerc is already backed up with the entire ~/.config folder above
 if [[ -d "$HOME/.local/share/konsole" ]]; then
     cp -r "$HOME/.local/share/konsole" "$BACKUP_DIR/local/" 2>/dev/null || true
 fi
@@ -53,12 +56,6 @@ if [[ -d "$SRC_DIR/bin" ]]; then
     chmod +x "$HOME/.local/bin/hyprctl" \
               "$HOME/.local/bin/kcolorpicker" \
               "$HOME/.local/bin/qs-kwin-bridge.py" 2>/dev/null || true
-fi
-
-# .desktop files
-if [[ -d "$SRC_DIR/keyboardshortcuts/applications" ]]; then
-    cp "$SRC_DIR/keyboardshortcuts/applications/"*.desktop \
-       "$HOME/.local/share/applications/" 2>/dev/null || true
 fi
 
 # systemd user service

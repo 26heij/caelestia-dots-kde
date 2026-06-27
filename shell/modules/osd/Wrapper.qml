@@ -19,13 +19,11 @@ Item {
     property real offsetScale: shouldBeActive ? 0 : 1
     property real sidebarOffset: sidebarOrSessionVisible ? 12 : 0
 
-    property real volume: Audio.volume
-    property bool muted: Audio.muted
-    property real sourceVolume: Audio.sourceVolume
-    property bool sourceMuted: Audio.sourceMuted
-    property real brightness: root.monitor?.brightness ?? 0
-
-    property bool _initialized: false
+    property real volume
+    property bool muted
+    property real sourceVolume
+    property bool sourceMuted
+    property real brightness
 
     function show(): void {
         visibilities.osd = true;
@@ -33,11 +31,16 @@ Item {
     }
 
     Component.onCompleted: {
-        _initialized = true;
+        volume = Audio.volume;
+        muted = Audio.muted;
+        sourceVolume = Audio.sourceVolume;
+        sourceMuted = Audio.sourceMuted;
+        brightness = root.monitor?.brightness ?? 0;
     }
 
     visible: offsetScale < 1
-    anchors.rightMargin: (-implicitWidth - 5 - sidebarOffset) * offsetScale
+    anchors.leftMargin: Config.bar.position === "right" ? (-implicitWidth - 5 - sidebarOffset) * offsetScale : 0
+    anchors.rightMargin: Config.bar.position !== "right" ? (-implicitWidth - 5 - sidebarOffset) * offsetScale : 0
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
     opacity: 1 - offsetScale
@@ -46,11 +49,38 @@ Item {
         Anim {}
     }
 
-    onVolumeChanged: { if (_initialized) root.show(); }
-    onMutedChanged: { if (_initialized) root.show(); }
-    onSourceVolumeChanged: { if (_initialized) root.show(); }
-    onSourceMutedChanged: { if (_initialized) root.show(); }
-    onBrightnessChanged: { if (_initialized) root.show(); }
+    Connections {
+        function onMutedChanged(): void {
+            root.show();
+            root.muted = Audio.muted;
+        }
+
+        function onVolumeChanged(): void {
+            root.show();
+            root.volume = Audio.volume;
+        }
+
+        function onSourceMutedChanged(): void {
+            root.show();
+            root.sourceMuted = Audio.sourceMuted;
+        }
+
+        function onSourceVolumeChanged(): void {
+            root.show();
+            root.sourceVolume = Audio.sourceVolume;
+        }
+
+        target: Audio
+    }
+
+    Connections {
+        function onBrightnessChanged(): void {
+            root.show();
+            root.brightness = root.monitor?.brightness ?? 0;
+        }
+
+        target: root.monitor
+    }
 
     Timer {
         id: timer

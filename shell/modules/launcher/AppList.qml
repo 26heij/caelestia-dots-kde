@@ -24,7 +24,7 @@ StyledListView {
 
     spacing: Tokens.spacing.small
     orientation: Qt.Vertical
-    implicitHeight: (Tokens.sizes.launcher.itemHeight + spacing) * Math.min(Config.launcher.maxShown, count) - spacing
+    implicitHeight: Math.max(0, (Tokens.sizes.launcher.itemHeight + spacing) * Math.min(Config.launcher.maxShown, count) - spacing)
 
     preferredHighlightBegin: 0
     preferredHighlightEnd: height
@@ -49,7 +49,8 @@ StyledListView {
         const text = search.text;
         const prefix = GlobalConfig.launcher.actionPrefix;
         if (text.startsWith(prefix)) {
-            for (const action of ["calc", "scheme", "variant"])
+            const actionPrefixes = ["calc", "scheme", "variant", "emoji", "clipboard", "windows"];
+            for (const action of actionPrefixes)
                 if (text.startsWith(`${prefix}${action} `))
                     return action;
 
@@ -62,6 +63,41 @@ StyledListView {
     onStateChanged: {
         if (state === "scheme" || state === "variant")
             Schemes.reload();
+        if (state === "emoji")
+            Emojis.reload();
+        if (state === "clipboard")
+            Clipboard.reload();
+            
+        if (state !== "scheme" && state !== "variant") {
+            Colours.showPreview = false;
+        }
+    }
+
+    onCurrentItemChanged: {
+        if (state === "scheme" || state === "variant") {
+            if (currentItem && currentItem.modelData)
+                previewTimer.restart();
+        }
+    }
+
+    Component.onDestruction: {
+        Colours.showPreview = false;
+    }
+
+    Timer {
+        id: previewTimer
+        interval: 100
+        onTriggered: {
+            if (!root.currentItem || !root.currentItem.modelData) return;
+            if (root.state === "scheme") {
+                const schemeData = root.currentItem.modelData;
+                Colours.load(JSON.stringify({ name: schemeData.name, flavour: schemeData.flavour, variant: Colours.variant, mode: Colours.light ? "light" : "dark", colours: schemeData.colours }), true);
+                Colours.showPreview = true;
+            } else if (root.state === "variant") {
+                const variantData = root.currentItem.modelData;
+                M3Variants.previewVariant(variantData.variant);
+            }
+        }
     }
 
     states: [
@@ -69,40 +105,112 @@ StyledListView {
             name: "apps"
 
             PropertyChanges {
-                model.values: Apps.search(search.text)
-                root.delegate: appItem
+                target: model
+                values: Apps.search(search.text)
+            }
+            PropertyChanges {
+                target: root
+                delegate: appItem
             }
         },
         State {
             name: "actions"
 
             PropertyChanges {
-                model.values: Actions.query(search.text)
-                root.delegate: actionItem
+                target: model
+                values: Actions.query(search.text)
+            }
+            PropertyChanges {
+                target: root
+                delegate: actionItem
             }
         },
         State {
             name: "calc"
 
             PropertyChanges {
-                model.values: [0]
-                root.delegate: calcItem
+                target: model
+                values: [0]
+            }
+            PropertyChanges {
+                target: root
+                delegate: calcItem
             }
         },
         State {
             name: "scheme"
 
             PropertyChanges {
-                model.values: Schemes.query(search.text)
-                root.delegate: schemeItem
+                target: model
+                values: Schemes.query(search.text)
+            }
+            PropertyChanges {
+                target: root
+                delegate: schemeItem
             }
         },
         State {
             name: "variant"
 
             PropertyChanges {
-                model.values: M3Variants.query(search.text)
-                root.delegate: variantItem
+                target: model
+                values: M3Variants.query(search.text)
+            }
+            PropertyChanges {
+                target: root
+                delegate: variantItem
+            }
+        },
+        State {
+            name: "emoji"
+
+            PropertyChanges {
+                target: model
+                values: {
+                    const prefix = GlobalConfig.launcher.actionPrefix;
+                    const text = root.search.text.slice((prefix + "emoji ").length).toLowerCase();
+                    if (!text)
+                        return Emojis.getSortedItems();
+                    return Emojis.items.filter(function (item) {
+                        return item.name.toLowerCase().includes(text);
+                    });
+                }
+            }
+            PropertyChanges {
+                target: root
+                delegate: emojiItem
+            }
+        },
+        State {
+            name: "clipboard"
+
+            PropertyChanges {
+                target: model
+                values: {
+                    const prefix = GlobalConfig.launcher.actionPrefix;
+                    const text = root.search.text.slice((prefix + "clipboard ").length).toLowerCase();
+                    if (!text)
+                        return Clipboard.getSortedItems();
+                    return Clipboard.items.filter(function (item) {
+                        return item.preview.toLowerCase().includes(text);
+                    });
+                }
+            }
+            PropertyChanges {
+                target: root
+                delegate: clipItem
+            }
+        },
+        State {
+            name: "windows"
+
+            PropertyChanges {
+                target: model
+                values: Windows.items
+            }
+            PropertyChanges {
+                target: root
+                delegate: windowsItem
             }
         }
     ]
@@ -253,6 +361,30 @@ StyledListView {
         id: variantItem
 
         VariantItem {
+            list: root
+        }
+    }
+
+    Component {
+        id: emojiItem
+
+        EmojiItem {
+            list: root
+        }
+    }
+
+    Component {
+        id: clipItem
+
+        ClipItem {
+            list: root
+        }
+    }
+
+    Component {
+        id: windowsItem
+
+        WindowSwitcherItem {
             list: root
         }
     }

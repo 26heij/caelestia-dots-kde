@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import qs.components
+import qs.components.controls
 import qs.services
 import qs.utils
 import qs.modules.nexus.common
@@ -13,6 +14,19 @@ PageBase {
 
     title: qsTr("Audio")
 
+    function addApp() {
+        let appName = silenceAppInput.text.trim();
+        if (appName !== "") {
+            let list = Array.from(GlobalConfig.audio.sounds.disabledNotifApps);
+            if (!list.includes(appName)) {
+                list.push(appName);
+                GlobalConfig.audio.sounds.disabledNotifApps = list;
+                GlobalConfig.save();
+            }
+            silenceAppInput.text = "";
+        }
+    }
+
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
@@ -21,7 +35,6 @@ PageBase {
 
         // Output
         SliderRow {
-            Layout.fillWidth: true
             first: true
             icon: Icons.getVolumeIcon(Audio.volume, Audio.muted)
             label: qsTr("Output")
@@ -29,10 +42,10 @@ PageBase {
             value: Audio.volume
             enabled: !Audio.muted
             onMoved: v => Audio.setVolume(v)
+            onReleased: v => Audio.playEffectTick()
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Muted")
             checked: Audio.muted
             onToggled: Audio.setStreamMuted(Audio.sink, checked)
@@ -49,7 +62,6 @@ PageBase {
 
         // Input
         SliderRow {
-            Layout.fillWidth: true
             Layout.topMargin: Tokens.spacing.large - parent.spacing
             first: true
             icon: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
@@ -58,10 +70,10 @@ PageBase {
             value: Audio.sourceVolume
             enabled: !Audio.sourceMuted
             onMoved: v => Audio.setSourceVolume(v)
+            onReleased: v => Audio.playEffectTick()
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Muted")
             checked: Audio.sourceMuted
             onToggled: Audio.setStreamMuted(Audio.source, checked)
@@ -99,7 +111,7 @@ PageBase {
 
                 MaterialIcon {
                     text: "tune"
-                    font: Tokens.font.icon.medium
+                    fontStyle: Tokens.font.icon.medium
                 }
 
                 ColumnLayout {
@@ -126,7 +138,187 @@ PageBase {
                 MaterialIcon {
                     text: "chevron_right"
                     color: Colours.palette.m3onSurfaceVariant
-                    font: Tokens.font.icon.medium
+                    fontStyle: Tokens.font.icon.medium
+                }
+            }
+        }
+
+        // Sound effects
+        StyledText {
+            Layout.fillWidth: true
+            Layout.topMargin: Tokens.spacing.large - parent.spacing
+            text: qsTr("Sound effects")
+            font: Tokens.font.body.small
+            color: Colours.palette.m3primary
+        }
+
+        ToggleRow {
+            Layout.fillWidth: true
+            first: true
+            text: qsTr("Enable sound effects")
+            checked: GlobalConfig.audio.sounds.enabled
+            onToggled: GlobalConfig.audio.sounds.enabled = checked
+        }
+
+        SliderRow {
+            Layout.fillWidth: true
+            icon: "volume_up"
+            label: qsTr("SFX Volume")
+            valueLabel: Math.round(value * 100) + "%"
+            value: GlobalConfig.audio.sounds.sfxVolume
+            enabled: GlobalConfig.audio.sounds.enabled
+            onMoved: v => GlobalConfig.audio.sounds.sfxVolume = v
+            onInteraction: v => Audio.playEffectTick()
+        }
+
+        SliderRow {
+            Layout.fillWidth: true
+            icon: "notifications"
+            label: qsTr("Notification Volume")
+            valueLabel: Math.round(value * 100) + "%"
+            value: GlobalConfig.audio.sounds.notificationVolume
+            enabled: GlobalConfig.audio.sounds.enabled
+            onMoved: v => GlobalConfig.audio.sounds.notificationVolume = v
+            onInteraction: v => Audio.playNotification()
+        }
+
+        ToggleRow {
+            Layout.fillWidth: true
+            text: qsTr("Camera click")
+            checked: GlobalConfig.audio.sounds.cameraClick
+            enabled: GlobalConfig.audio.sounds.enabled
+            onToggled: GlobalConfig.audio.sounds.cameraClick = checked
+        }
+
+        ToggleRow {
+            Layout.fillWidth: true
+            text: qsTr("Charging started")
+            checked: GlobalConfig.audio.sounds.chargingStarted
+            enabled: GlobalConfig.audio.sounds.enabled
+            onToggled: GlobalConfig.audio.sounds.chargingStarted = checked
+        }
+
+        ToggleRow {
+            Layout.fillWidth: true
+            text: qsTr("Volume tick")
+            checked: GlobalConfig.audio.sounds.effectTick
+            enabled: GlobalConfig.audio.sounds.enabled
+            onToggled: GlobalConfig.audio.sounds.effectTick = checked
+        }
+
+        ToggleRow {
+            Layout.fillWidth: true
+            text: qsTr("Screen lock")
+            checked: GlobalConfig.audio.sounds.lock
+            enabled: GlobalConfig.audio.sounds.enabled
+            onToggled: GlobalConfig.audio.sounds.lock = checked
+        }
+
+        ToggleRow {
+            Layout.fillWidth: true
+            text: qsTr("Screen unlock")
+            checked: GlobalConfig.audio.sounds.unlock
+            enabled: GlobalConfig.audio.sounds.enabled
+            onToggled: GlobalConfig.audio.sounds.unlock = checked
+        }
+
+        ToggleRow {
+            Layout.fillWidth: true
+            text: qsTr("Low battery")
+            checked: GlobalConfig.audio.sounds.lowBattery
+            enabled: GlobalConfig.audio.sounds.enabled
+            onToggled: GlobalConfig.audio.sounds.lowBattery = checked
+        }
+
+        ToggleRow {
+            Layout.fillWidth: true
+            last: true
+            text: qsTr("Screen record")
+            checked: GlobalConfig.audio.sounds.screenRecord
+            enabled: GlobalConfig.audio.sounds.enabled
+            onToggled: GlobalConfig.audio.sounds.screenRecord = checked
+        }
+
+        // Notification Silencing
+        StyledText {
+            Layout.fillWidth: true
+            Layout.topMargin: Tokens.spacing.large - parent.spacing
+            text: qsTr("Notification silencing")
+            font: Tokens.font.body.small
+            color: Colours.palette.m3primary
+        }
+
+        StyledText {
+            Layout.fillWidth: true
+            Layout.leftMargin: Tokens.padding.small
+            Layout.bottomMargin: Tokens.spacing.medium
+            text: qsTr("Mute notification sounds for specific apps")
+            color: Colours.palette.m3outline
+            font: Tokens.font.body.small
+            wrapMode: Text.WordWrap
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Tokens.spacing.small
+
+            StyledInputField {
+                id: silenceAppInput
+
+                Layout.fillWidth: true
+                // placeholderText is also not exposed in StyledInputField? Let's check... wait, we can't use it if it's not exposed.
+                onEditingFinished: root.addApp()
+            }
+
+            IconTextButton {
+                text: qsTr("Add")
+                icon: "add"
+                onClicked: root.addApp()
+            }
+        }
+
+        Flow {
+            Layout.fillWidth: true
+            spacing: Tokens.spacing.small
+
+            Repeater {
+                model: GlobalConfig.audio.sounds.disabledNotifApps
+                delegate: StyledRect {
+                    required property string modelData
+                    required property int index
+
+                    width: implicitWidth
+                    height: implicitHeight
+                    color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                    radius: Tokens.rounding.large
+                    implicitWidth: chipLayout.implicitWidth + Tokens.padding.medium * 2
+                    implicitHeight: chipLayout.implicitHeight + Tokens.padding.extraSmall * 2
+
+                    RowLayout {
+                        id: chipLayout
+
+                        x: Tokens.padding.medium
+                        y: Tokens.padding.extraSmall
+                        spacing: Tokens.spacing.extraSmall
+
+                        StyledText {
+                            text: modelData
+                        }
+
+                        MaterialIcon {
+                            text: "close"
+                            font: Tokens.font.icon.small
+
+                            StateLayer {
+                                onClicked: {
+                                    let list = Array.from(GlobalConfig.audio.sounds.disabledNotifApps);
+                                    list.splice(index, 1);
+                                    GlobalConfig.audio.sounds.disabledNotifApps = list;
+                                    GlobalConfig.save();
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

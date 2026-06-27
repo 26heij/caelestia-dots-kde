@@ -6,6 +6,7 @@ import qs.components
 import qs.components.effects
 import qs.components.images
 import qs.services
+import qs.utils
 
 Item {
     id: root
@@ -62,12 +63,22 @@ Item {
             text: "image"
             color: Colours.tPalette.m3outline
             fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.DemiBold).build()
+            visible: !Images.isVideo(root.modelData.name)
+        }
+
+        MaterialIcon {
+            anchors.centerIn: parent
+            text: "videocam"
+            color: Colours.tPalette.m3outline
+            fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.DemiBold).build()
+            visible: Images.isVideo(root.modelData.name)
         }
 
         CachingImage {
             anchors.fill: parent
             path: root.modelData.path
             smooth: !root.PathView.view.moving
+            visible: !Images.isVideo(root.modelData.name)
             sourceSize: {
                 const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
                 return Qt.size(image.implicitWidth * dpr, image.implicitHeight * dpr);
@@ -86,7 +97,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         renderType: Text.QtRendering
-        text: root.modelData.relativePath
+        text: root.modelData.name
         font: Tokens.font.label.medium
     }
 

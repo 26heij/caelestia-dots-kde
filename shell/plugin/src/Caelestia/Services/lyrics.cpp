@@ -136,7 +136,7 @@ void Lyrics::setSelectedCandidate(const LyricCandidate& value) {
     cancelInFlight();
     const int reqId = newRequestId();
 
-    if (b == LyricsBackend::LRCLIB || b == LyricsBackend::NetEase || b == LyricsBackend::Kugou) {
+    if (b == LyricsBackend::LRCLIB || b == LyricsBackend::NetEase) {
         const QString cached = readCachedLrc(b, value.id());
         if (!cached.isEmpty()) {
             const auto lines = parseLrc(cached);
@@ -155,8 +155,6 @@ void Lyrics::setSelectedCandidate(const LyricCandidate& value) {
         fetchLrclibById(value.id(), reqId);
     } else if (b == LyricsBackend::NetEase) {
         fetchNetEaseLyricsById(value.id(), reqId);
-    } else if (b == LyricsBackend::Kugou) {
-        fetchKugouLyricsById(value.id(), reqId);
     } else if (b == LyricsBackend::Local) {
         // For local, the id is the file path. Read directly.
         QFile f(value.id());
@@ -392,7 +390,6 @@ void Lyrics::doLoad() {
     // Always populate online candidates for the picker, regardless of preferred backend
     searchLrclibCandidates(reqId);
     searchNetEaseCandidates(reqId);
-    searchKugouCandidates(reqId);
 
     if (restored.isValid()) {
         // Honor saved selection for this track
@@ -412,9 +409,6 @@ void Lyrics::doLoad() {
         break;
     case LyricsBackend::NetEase:
         tryNetEase(reqId);
-        break;
-    case LyricsBackend::Kugou:
-        tryKugou(reqId);
         break;
     case LyricsBackend::Auto:
     default:
@@ -437,9 +431,6 @@ void Lyrics::chainNext(LyricsBackend::Backend just_failed, int reqId) {
         tryNetEase(reqId);
         return;
     case LyricsBackend::NetEase:
-        tryKugou(reqId);
-        return;
-    case LyricsBackend::Kugou:
     default:
         setLoading(false);
         return;
@@ -772,154 +763,6 @@ void Lyrics::fetchNetEaseLyricsById(const QString& id, int reqId) {
     });
 }
 
-void Lyrics::tryKugou(int reqId) {
-    if (reqId != m_currentRequestId) {
-        return;
-    }
-
-    setBackend(LyricsBackend::Kugou);
-
-    QUrl url(u"http://lyrics.kugou.com/search"_s);
-    QUrlQuery q;
-    q.addQueryItem(u"ver"_s, u"1"_s);
-    q.addQueryItem(u"man"_s, u"yes"_s);
-    q.addQueryItem(u"client"_s, u"pc"_s);
-    q.addQueryItem(u"keyword"_s, u"%1 - %2"_s.arg(m_artist, m_title));
-    q.addQueryItem(u"duration"_s, m_duration > 0 ? QString::number(qRound(m_duration * 1000.0)) : u""_s);
-    q.addQueryItem(u"hash"_s, u""_s);
-    url.setQuery(q);
-
-    auto* reply = getJson(url);
-    trackReply(reqId, reply);
-
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, reqId] {
-        reply->deleteLater();
-        if (reqId != m_currentRequestId) {
-            return;
-        }
-        if (reply->error() != QNetworkReply::NoError) {
-            qCDebug(lcLyrics) << "kugou /search error:" << reply->errorString();
-            chainNext(LyricsBackend::Kugou, reqId);
-            return;
-        }
-
-        const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        const QJsonArray candidates = doc.object().value(u"candidates"_s).toArray();
-        if (candidates.isEmpty()) {
-            qCDebug(lcLyrics) << "kugou: no candidates for" << m_artist << "-" << m_title;
-            chainNext(LyricsBackend::Kugou, reqId);
-            return;
-        }
-
-        // Just pick the first candidate since Kugou sorts by relevance
-        const QJsonObject best = candidates.first().toObject();
-        const QString id = best.value(u"id"_s).toString();
-        const QString accesskey = best.value(u"accesskey"_s).toString();
-
-        if (id.isEmpty() || accesskey.isEmpty()) {
-            chainNext(LyricsBackend::Kugou, reqId);
-            return;
-        }
-
-        fetchKugouLyricsById(u"%1:%2"_s.arg(id, accesskey), reqId);
-    });
-}
-
-void Lyrics::searchKugouCandidates(int reqId) {
-    QUrl url(u"http://lyrics.kugou.com/search"_s);
-    QUrlQuery q;
-    q.addQueryItem(u"ver"_s, u"1"_s);
-    q.addQueryItem(u"man"_s, u"yes"_s);
-    q.addQueryItem(u"client"_s, u"pc"_s);
-    q.addQueryItem(u"keyword"_s, u"%1 - %2"_s.arg(m_artist, m_title));
-    q.addQueryItem(u"duration"_s, m_duration > 0 ? QString::number(qRound(m_duration * 1000.0)) : u""_s);
-    q.addQueryItem(u"hash"_s, u""_s);
-    url.setQuery(q);
-
-    auto* reply = getJson(url);
-    trackReply(reqId, reply);
-
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, reqId] {
-        reply->deleteLater();
-        if (reqId != m_currentRequestId) {
-            return;
-        }
-        if (reply->error() != QNetworkReply::NoError) {
-            return;
-        }
-
-        const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        const QJsonArray candidates = doc.object().value(u"candidates"_s).toArray();
-
-        QList<LyricCandidate> add;
-        add.reserve(candidates.size());
-        for (const auto& v : candidates) {
-            const QJsonObject o = v.toObject();
-            const QString id = o.value(u"id"_s).toString();
-            const QString accesskey = o.value(u"accesskey"_s).toString();
-            if (id.isEmpty() || accesskey.isEmpty()) {
-                continue;
-            }
-            
-            // Reconstruct artist/title from keyword or use the provided singer/song fields
-            QString sArtist = o.value(u"singer"_s).toString();
-            QString sTitle = o.value(u"song"_s).toString();
-            
-            add.append(LyricCandidate(LyricsBackend::Kugou, u"%1:%2"_s.arg(id, accesskey), 
-                sTitle.isEmpty() ? m_title : sTitle, sArtist.isEmpty() ? m_artist : sArtist, 
-                u""_s, o.value(u"duration"_s).toDouble() / 1000.0));
-        }
-        appendCandidates(add);
-    });
-}
-
-void Lyrics::fetchKugouLyricsById(const QString& combinedId, int reqId) {
-    const QStringList parts = combinedId.split(QLatin1Char(':'));
-    if (parts.size() != 2) {
-        setLoading(false);
-        return;
-    }
-    const QString id = parts[0];
-    const QString accesskey = parts[1];
-
-    QUrl url(u"http://lyrics.kugou.com/download"_s);
-    QUrlQuery q;
-    q.addQueryItem(u"ver"_s, u"1"_s);
-    q.addQueryItem(u"client"_s, u"pc"_s);
-    q.addQueryItem(u"id"_s, id);
-    q.addQueryItem(u"accesskey"_s, accesskey);
-    q.addQueryItem(u"fmt"_s, u"lrc"_s);
-    q.addQueryItem(u"charset"_s, u"utf8"_s);
-    url.setQuery(q);
-
-    auto* reply = getJson(url);
-    trackReply(reqId, reply);
-
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, reqId, combinedId] {
-        reply->deleteLater();
-        if (reqId != m_currentRequestId) {
-            return;
-        }
-        if (reply->error() != QNetworkReply::NoError) {
-            qCWarning(lcLyrics) << "kugou /download error:" << reply->errorString();
-            setLoading(false);
-            return;
-        }
-        const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        const QString b64content = doc.object().value(u"content"_s).toString();
-        if (b64content.isEmpty()) {
-            qCDebug(lcLyrics) << "kugou /download: empty content";
-            setLoading(false);
-            return;
-        }
-        
-        const QString lrc = QString::fromUtf8(QByteArray::fromBase64(b64content.toUtf8()));
-        writeCachedLrc(LyricsBackend::Kugou, combinedId, lrc);
-        setLines(parseLrc(lrc), LyricsBackend::Kugou);
-        setLoading(false);
-    });
-}
-
 QNetworkReply* Lyrics::getJson(const QUrl& url, const QHash<QByteArray, QByteArray>& headers) {
     QNetworkRequest req(url);
     req.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::AlwaysNetwork);
@@ -1037,8 +880,6 @@ QString Lyrics::backendKey(LyricsBackend::Backend value) {
         return u"LRCLIB"_s;
     case LyricsBackend::NetEase:
         return u"NetEase"_s;
-    case LyricsBackend::Kugou:
-        return u"Kugou"_s;
     case LyricsBackend::Auto:
     default:
         return u"Auto"_s;
@@ -1054,9 +895,6 @@ LyricsBackend::Backend Lyrics::backendFromKey(const QString& key) {
     }
     if (key.compare(u"NetEase"_s, Qt::CaseInsensitive) == 0) {
         return LyricsBackend::NetEase;
-    }
-    if (key.compare(u"Kugou"_s, Qt::CaseInsensitive) == 0) {
-        return LyricsBackend::Kugou;
     }
     return LyricsBackend::Auto;
 }

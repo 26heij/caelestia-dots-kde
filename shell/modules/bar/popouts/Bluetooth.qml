@@ -15,15 +15,33 @@ ColumnLayout {
 
     required property PopoutState popouts
 
-    width: 300
+    property bool _isSidebarOpen: popouts.sidebarOpen && popouts.isHorizontal
+
+    width: Math.max(300, _isSidebarOpen ? Tokens.sizes.sidebar.width - Tokens.padding.extraLargeIncreased : 0)
     spacing: Tokens.spacing.small
 
     StyledText {
         Layout.topMargin: Tokens.padding.medium
-        Layout.rightMargin: Tokens.padding.extraSmall
+        Layout.leftMargin: Tokens.padding.small
         text: qsTr("Bluetooth")
-        font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
+        font.weight: 500
     }
+
+    StyledRect {
+        Layout.fillWidth: true
+        implicitWidth: cardLayout.implicitWidth + Tokens.padding.medium * 2
+        implicitHeight: cardLayout.implicitHeight + Tokens.padding.medium * 2
+        radius: Tokens.rounding.medium
+        color: Colours.tPalette.m3surfaceContainer
+        clip: true
+
+        ColumnLayout {
+            id: cardLayout
+
+            width: parent.width - Tokens.padding.medium * 2
+            x: Tokens.padding.medium
+            y: Tokens.padding.medium
+            spacing: Tokens.spacing.small
 
     Toggle {
         label: qsTr("Enabled")
@@ -105,10 +123,21 @@ ColumnLayout {
                 elide: Text.ElideRight
             }
 
-            MaterialIcon {
+            RowLayout {
                 visible: device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
-                text: device.modelData.batteryAvailable ? Icons.getBatteryIcon(device.modelData.battery) : "battery_alert"
-                color: device.modelData.batteryAvailable && device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                spacing: Tokens.spacing.extraSmall
+
+                MaterialIcon {
+                    text: device.modelData.batteryAvailable ? Icons.getBatteryIcon(device.modelData.battery) : "battery_alert"
+                    color: device.modelData.batteryAvailable && device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                }
+
+                StyledText {
+                    visible: device.modelData.batteryAvailable // qmllint disable unresolved-type
+                    text: device.modelData.batteryAvailable ? qsTr("%1%").arg(Math.round(device.modelData.battery * 100)) : "" // qmllint disable unresolved-type
+                    font: Tokens.font.body.small
+                    color: device.modelData.batteryAvailable && device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                }
             }
 
             StyledRect {
@@ -171,12 +200,14 @@ ColumnLayout {
         }
     }
 
+        }
+    }
+
     IconTextButton {
         Layout.fillWidth: true
-        Layout.topMargin: Tokens.spacing.medium
         inactiveColour: Colours.palette.m3primaryContainer
         inactiveOnColour: Colours.palette.m3onPrimaryContainer
-        verticalPadding: Tokens.padding.extraSmall
+        verticalPadding: Tokens.padding.small
         text: qsTr("Open settings")
         icon: "settings"
 
