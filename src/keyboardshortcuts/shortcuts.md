@@ -46,23 +46,32 @@ super + shift + l
 ctrl + alt + delete
     caelestia shell drawers toggle session
 ```
+## OLD GUIs
+#    caelestia clipboard    
+
+## TO RUN ANY OTHER COMMAND PRESENT IN launcher's command menu
+# map any shortcut to qs -c caelestia ipc call launcher action <command name>
 
 ## Desktop & Shell UI
 ```ini
 super + space
     caelestia shell drawers toggle launcher
 super + v
-    caelestia clipboard
+    qs -c caelestia ipc call launcher action clipboard
 super + shift + v
+    qs -c caelestia ipc call launcher action emoji
+super + alt + v
     caelestia emoji -p
 super + slash
-    caelestia shell shortcuts open
+    qs -c caelestia ipc call launcher action keybinds
+super + ctrl + t
+    qs -c caelestia ipc call launcher action wallpaper
 ```
 
 ## Screenshots & Recording
 ```ini
 super + shift + s
-    caelestia shell drawers toggle screenshot
+    caelestia shell region screenshot
 super + ctrl + s
     caelestia record -s
 super + shift + a
@@ -72,5 +81,5 @@ super + b
 super + shift + c
     ~/.local/bin/kcolorpicker -a
 print
-    caelestia shell drawers toggle screenshot
+    caelestia shell region screenshot
 ```

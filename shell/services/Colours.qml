@@ -15,6 +15,10 @@ Singleton {
     property bool showPreview
     property string scheme
     property string flavour
+    property string variant
+    property string previewScheme: ""
+    property string previewFlavour: ""
+    property string previewVariant: ""
     readonly property bool light: showPreview ? previewLight : currentLight
     property bool currentLight
     property bool previewLight
@@ -64,11 +68,15 @@ Singleton {
         const scheme = JSON.parse(data);
 
         if (!isPreview) {
-            root.scheme = scheme.name;
-            flavour = scheme.flavour;
-            currentLight = scheme.mode === "light";
+            root.scheme = (scheme.name || "").trim();
+            root.flavour = (scheme.flavour || "").trim();
+            root.variant = (scheme.variant || "").trim();
+            root.currentLight = scheme.mode === "light";
         } else {
-            previewLight = scheme.mode === "light";
+            root.previewScheme = (scheme.name || "").trim();
+            root.previewFlavour = (scheme.flavour || "").trim();
+            root.previewVariant = (scheme.variant || "").trim();
+            root.previewLight = scheme.mode === "light";
         }
 
         for (const [name, colour] of Object.entries(scheme.colours)) {
@@ -111,6 +119,8 @@ Singleton {
         target: Hypr
     }
 
+
+
     FileView {
         path: `${Paths.state}/scheme.json`
         watchChanges: true
@@ -145,7 +155,7 @@ Singleton {
     }
 
     component Transparency: QtObject {
-        readonly property bool enabled: Tokens.transparency.enabled
+        readonly property bool enabled: Tokens.transparency.enabled && !(GameMode.enabled && GlobalConfig.utilities.gameMode.disableShellTransparency)
         readonly property real base: Math.max(0, Math.min(1, Tokens.transparency.base - (root.light ? 0.1 : 0)))
         readonly property real layers: Tokens.transparency.layers
 

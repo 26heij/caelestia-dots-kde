@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Caelestia
 import Caelestia.Config
 import Caelestia.Models
 import qs.services
@@ -13,7 +14,7 @@ Searcher {
 
     readonly property string currentNamePath: `${Paths.state}/wallpaper/path.txt`
     readonly property list<string> smartArg: GlobalConfig.services.smartScheme ? [] : ["--no-smart"]
-    readonly property string fallback: Quickshell.shellPath("assets/wallpaper.webp")
+    readonly property string fallback: Quickshell.shellPath("assets/wallpapers/Minimal-Paper.png")
 
     property bool showPreview: false
     readonly property string current: showPreview ? previewPath : actualCurrent
@@ -21,6 +22,45 @@ Searcher {
     property string actualCurrent
     property bool previewColourLock
     property bool pendingPreviewClear
+
+    onActualCurrentChanged: {
+        // Sync KDE Plasma wallpaper
+        Quickshell.execDetached(["sh", "-c", "qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript 'var allDesktops = desktops();for (i=0;i<allDesktops.length;i++) {d = allDesktops[i];d.wallpaperPlugin = \"org.kde.image\";d.currentConfigGroup = Array(\"Wallpaper\", \"org.kde.image\", \"General\");d.writeConfig(\"Image\", \"file://" + actualCurrent + "\")}'"]);
+    }
+
+    readonly property var categories: {
+        let dummy = root.list;
+        const baseDir = Paths.wallsdir;
+        let cats = [];
+        for (let i = 0; i < root.list.length; i++) {
+            let p = root.list[i].parentDir;
+            if (p !== baseDir) {
+                let cat = p.slice(baseDir.length + 1);
+                if (cat.includes("/")) cat = cat.slice(0, cat.indexOf("/"));
+                if (!cats.includes(cat)) cats.push(cat);
+            }
+        }
+        return ["Main"].concat(cats.sort());
+    }
+
+    readonly property var grouped: {
+        let dummy = root.list;
+        const baseDir = Paths.wallsdir;
+        let grp = { "Main": [] };
+        for (let i = 0; i < root.list.length; i++) {
+            let w = root.list[i];
+            let p = w.parentDir;
+            if (p === baseDir) {
+                grp["Main"].push(w);
+            } else {
+                let cat = p.slice(baseDir.length + 1);
+                if (cat.includes("/")) cat = cat.slice(0, cat.indexOf("/"));
+                if (!grp[cat]) grp[cat] = [];
+                grp[cat].push(w);
+            }
+        }
+        return grp;
+    }
 
     function getCategoryFor(w: FileSystemEntry): string {
         let category = w.parentDir.slice(Paths.wallsdir.length + 1);
@@ -52,6 +92,13 @@ Searcher {
             pendingPreviewClear = true;
         else
             Colours.showPreview = false;
+    }
+
+    function getThumbnailPath(path: string): string {
+        if (Images.isVideo(path)) {
+            return `${Paths.cache}/wallpapers/${CUtils.sha256(path)}/first_frame.png`;
+        }
+        return path;
     }
 
     onPreviewColourLockChanged: {
@@ -95,13 +142,11 @@ Searcher {
             }
             root.actualCurrent = wall;
             root.previewColourLock = false;
-            Quickshell.execDetached(["plasma-apply-wallpaperimage", wall]);
         }
         onLoadFailed: {
             root.actualCurrent = root.fallback;
             root.previewColourLock = false;
             Quickshell.execDetached(["caelestia", "wallpaper", "-f", root.fallback, ...root.smartArg]);
-            Quickshell.execDetached(["plasma-apply-wallpaperimage", root.fallback]);
         }
     }
 
@@ -110,7 +155,8 @@ Searcher {
 
         recursive: true
         path: Paths.wallsdir
-        filter: FileSystemModel.Images
+        filter: FileSystemModel.Files
+        nameFilters: Images.validImageExtensions.concat(Images.validVideoExtensions).map(e => `*.${e}`)
     }
 
     Process {

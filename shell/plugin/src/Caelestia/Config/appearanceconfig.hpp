@@ -316,6 +316,9 @@ class AppearanceConfig : public ConfigObject {
     CONFIG_SUBOBJECT(AppearanceAnim, anim)
     CONFIG_SUBOBJECT(AppearanceTransparency, transparency)
 
+    CONFIG_GLOBAL_PROPERTY(bool, pitchBlack, false)
+    CONFIG_GLOBAL_PROPERTY(bool, islands, false)
+
 public:
     explicit AppearanceConfig(QObject* parent = nullptr)
         : ConfigObject(parent)

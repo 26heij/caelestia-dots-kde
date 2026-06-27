@@ -17,7 +17,10 @@ ConnectedRect {
     property real value
 
     signal moved(value: real)
+    signal interaction(value: real)
+    signal released(value: real)
 
+    Layout.fillWidth: true
     implicitHeight: rowLayout.implicitHeight + rowLayout.anchors.margins + rowLayout.anchors.topMargin
 
     RowLayout {
@@ -31,8 +34,9 @@ ConnectedRect {
         MaterialIcon {
             id: icon
 
+            visible: text !== ""
             color: Colours.palette.m3onSurfaceVariant
-            font: Tokens.font.icon.medium
+            fontStyle: Tokens.font.icon.medium
         }
 
         ColumnLayout {
@@ -80,7 +84,11 @@ ConnectedRect {
                     radius: Tokens.rounding.small
                     value: root.value
                     enabled: root.enabled
-                    onInteraction: v => root.moved(v)
+                    onInteraction: v => {
+                        root.moved(v);
+                        root.interaction(v);
+                    }
+                    onReleased: v => root.released(v)
                 }
             }
         }

@@ -1,13 +1,16 @@
 #include "cutils.hpp"
 
 #include <QtConcurrent/qtconcurrentrun.h>
+#include <qcryptographichash.h>
 #include <QtQuick/qquickitemgrabresult.h>
 #include <QtQuick/qquickwindow.h>
 #include <qdir.h>
+#include <qfile.h>
 #include <qfileinfo.h>
 #include <qfuturewatcher.h>
 #include <qloggingcategory.h>
 #include <qqmlengine.h>
+#include <QStandardPaths>
 
 Q_LOGGING_CATEGORY(lcCUtils, "caelestia.cutils", QtInfoMsg)
 
@@ -136,6 +139,20 @@ QString CUtils::toLocalFile(const QUrl& url) {
     }
 
     return url.toLocalFile();
+}
+
+QString CUtils::sha256(const QString& path) {
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qCWarning(lcCUtils) << "sha256: failed to open" << path;
+        return QString();
+    }
+
+    QCryptographicHash hash(QCryptographicHash::Sha256);
+    hash.addData(&file);
+    file.close();
+
+    return hash.result().toHex();
 }
 
 qreal CUtils::clamp(qreal value, qreal min, qreal max) {

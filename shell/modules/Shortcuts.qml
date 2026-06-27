@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia
+import Caelestia.Config
 import qs.components.misc
 import qs.services
 import qs.modules.nexus
@@ -10,7 +11,7 @@ Scope {
     id: root
 
     property bool launcherInterrupted
-    readonly property bool hasFullscreen: Hypr.focusedWorkspace?.toplevels?.values?.some(t => t.lastIpcObject.fullscreen > 1) ?? false
+    readonly property bool hasFullscreen: Hypr.focusedWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false
 
     // qmllint disable unresolved-type
     CustomShortcut {
@@ -73,6 +74,18 @@ Scope {
     // qmllint disable unresolved-type
     CustomShortcut {
         // qmllint enable unresolved-type
+        name: "screenRecording"
+        description: "Toggle screen recording"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            Quickshell.execDetached(["caelestia", "shell", "region", "record"]);
+        }
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
         name: "session"
         description: "Toggle session menu"
         onPressed: {
@@ -115,7 +128,22 @@ Scope {
             if (root.hasFullscreen)
                 return;
             const visibilities = Visibilities.getForActive();
+            Visibilities.initialSidebarTab = "notifications";
             visibilities.sidebar = !visibilities.sidebar;
+        }
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "aiAssistant"
+        description: "Toggle AI Assistant"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            const visibilities = Visibilities.getForActive();
+            Visibilities.initialSidebarTab = "ai";
+            visibilities.sidebar = true;
         }
     }
 
@@ -132,13 +160,98 @@ Scope {
         }
     }
 
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "emoji"
+        description: "Open emoji picker"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            Visibilities.launcherInitialSearch = `${GlobalConfig.launcher.actionPrefix}emoji `;
+            const visibilities = Visibilities.getForActive();
+            visibilities.launcher = true;
+        }
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "clipboard"
+        description: "Open clipboard history"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            Visibilities.launcherInitialSearch = `${GlobalConfig.launcher.actionPrefix}clipboard `;
+            const visibilities = Visibilities.getForActive();
+            visibilities.launcher = true;
+        }
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "windowSwitcher"
+        description: "Open window switcher"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            Visibilities.launcherInitialSearch = `${GlobalConfig.launcher.actionPrefix}windows `;
+            const visibilities = Visibilities.getForActive();
+            visibilities.launcher = true;
+        }
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "wallpaper"
+        description: "Open wallpaper picker"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            Visibilities.launcherInitialSearch = `${GlobalConfig.launcher.actionPrefix}wallpaper `;
+            const visibilities = Visibilities.getForActive();
+            visibilities.launcher = true;
+        }
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "keybinds"
+        description: "Open keybinds list"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            Visibilities.launcherInitialSearch = `${GlobalConfig.launcher.actionPrefix}keybinds `;
+            const visibilities = Visibilities.getForActive();
+            visibilities.launcher = true;
+        }
+    }
+
     IpcHandler {
         function toggle(drawer: string): void {
-            console.warn(lc, `Toggling drawer: >${drawer}< length: ${drawer.length}`);
-            if (drawer === "screenshot") { Quickshell.execDetached(["caelestia", "shell", "region", "screenshot"]); return; }
-            if (list().split("\n").includes(drawer) || drawer === "screenshot") {
+            if (list().split("\n").includes(drawer)) {
                 if (root.hasFullscreen && ["launcher", "session", "dashboard"].includes(drawer))
                     return;
+                const visibilities = Visibilities.getForActive();
+                visibilities[drawer] = !visibilities[drawer];
+            } else {
+                console.warn(lc, `Drawer "${drawer}" does not exist`);
+            }
+        }
+
+        function toggleTab(drawer: string, tab: string): void {
+            if (list().split("\n").includes(drawer)) {
+                if (root.hasFullscreen && ["launcher", "session", "dashboard"].includes(drawer))
+                    return;
+                if (drawer === "sidebar" && tab !== "") {
+                    Visibilities.initialSidebarTab = tab;
+                    const visibilities = Visibilities.getForActive();
+                    visibilities.sidebar = true;
+                    return;
+                }
                 const visibilities = Visibilities.getForActive();
                 visibilities[drawer] = !visibilities[drawer];
             } else {
@@ -182,17 +295,16 @@ Scope {
         target: "toaster"
     }
 
-    Process {
-        id: shortcutsProcess
-        command: ["bash", "-c", "~/.local/bin/caelestia-shortcuts"]
-    }
-
     IpcHandler {
-        function open(): void {
-            shortcutsProcess.running = true;
+        function action(name: string): void {
+            Visibilities.launcherInitialSearch =
+            `${GlobalConfig.launcher.actionPrefix}${name} `;
+
+            const visibilities = Visibilities.getForActive();
+            visibilities.launcher = true;
         }
 
-        target: "shortcuts"
+        target: "launcher"
     }
 
     LoggingCategory {

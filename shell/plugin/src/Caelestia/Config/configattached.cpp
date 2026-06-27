@@ -57,11 +57,6 @@ void Config::attachedParentChange(
     const Type* Config::name() const {                                                                                 \
         if (m_config)                                                                                                  \
             return m_config->name();                                                                                   \
-        /* Suppress warnings before component is complete if attached to a QQuickItem. */                              \
-        /* Raw QObjects are unable to inherit the screen (only QQuickItems can). */                                    \
-        if ((m_complete || !qobject_cast<QQuickItem*>(parent())) && parent())                                          \
-            qCWarning(lcConfig, "Config.%s accessed without a screen set on %s", #name,                                \
-                parent()->metaObject()->className());                                                                  \
         return GlobalConfig::instance()->name();                                                                       \
     }
 
@@ -77,6 +72,7 @@ CONFIG_ATTACHED_GETTER(NexusConfig, nexus)
 CONFIG_ATTACHED_GETTER(NotifsConfig, notifs)
 CONFIG_ATTACHED_GETTER(OsdConfig, osd)
 CONFIG_ATTACHED_GETTER(ServiceConfig, services)
+CONFIG_ATTACHED_GETTER(ShimejiConfig, shimeji)
 CONFIG_ATTACHED_GETTER(SessionConfig, session)
 CONFIG_ATTACHED_GETTER(SidebarConfig, sidebar)
 CONFIG_ATTACHED_GETTER(UtilitiesConfig, utilities)

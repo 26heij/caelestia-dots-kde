@@ -15,18 +15,23 @@ Item {
 
     required property ShellScreen screen
     required property real offsetScale
+    required property DrawerVisibilities visibilities
 
     readonly property alias content: content
     readonly property alias winfo: winfo
     readonly property alias nexus: nexus
 
-    readonly property real nonAnimWidth: children.find(c => c.shouldBeActive)?.implicitWidth ?? content.implicitWidth
-    readonly property real nonAnimHeight: children.find(c => c.shouldBeActive)?.implicitHeight ?? content.implicitHeight
+    readonly property real nonAnimWidth: content.shouldBeActive ? content.implicitWidth : winfo.shouldBeActive ? winfo.implicitWidth : nexus.shouldBeActive ? nexus.implicitWidth : content.implicitWidth
+    readonly property real nonAnimHeight: content.shouldBeActive ? content.implicitHeight : winfo.shouldBeActive ? winfo.implicitHeight : nexus.shouldBeActive ? nexus.implicitHeight : content.implicitHeight
     readonly property Item current: (content.item as Content)?.current ?? null
     readonly property bool isDetached: detachedMode.length > 0
+    readonly property bool sidebarOpen: popoutState.sidebarOpen
+    readonly property bool isDockPopout: currentName === "dockhover" || currentName === "dockcontext" || currentName === "activewindow" || currentName === "github"
 
     property alias currentName: popoutState.currentName
     property alias hasCurrent: popoutState.hasCurrent
+    property alias dockModel: popoutState.dockModel
+    property alias tasksModel: popoutState.tasksModel
     property real currentCenter
 
     property string detachedMode
@@ -87,10 +92,17 @@ Item {
     PopoutState {
         id: popoutState
 
+        sidebarOpen: root.visibilities.sidebar
+        isHorizontal: Config.bar.position === "top" || Config.bar.position === "bottom"
+
         onDetachRequested: mode => root.detach(mode)
     }
 
-    // HyprlandFocusGrab removed - ContentWindow handles click-outside natively now
+    HyprlandFocusGrab {
+        active: root.isDetached
+        windows: [QsWindow.window]
+        onCleared: root.close()
+    }
 
     Binding {
         when: root.isDetached || (root.hasCurrent && root.currentName === "wirelesspassword")
@@ -119,7 +131,13 @@ Item {
 
         sourceComponent: WindowInfo {
             screen: root.screen
-            client: Hypr.activeToplevel
+            clientAddress: popoutState.selectedClientAddress
+        }
+
+        onShouldBeActiveChanged: {
+            if (!shouldBeActive) {
+                popoutState.selectedClientAddress = "";
+            }
         }
     }
 
@@ -139,6 +157,7 @@ Item {
 
                 anchors.fill: parent
                 nState.screen: root.screen
+                nState.animatingContainer: nexus.opacity < 1
                 nState.currentPageIdx: ["appearance", "network", "bluetooth", "audio"].indexOf(root.queuedMode)
                 onClose: root.close()
             }

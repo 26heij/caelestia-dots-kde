@@ -108,6 +108,10 @@ class FontSizeTokens : public ConfigObject {
     CONFIG_PROPERTY(int, large, 18)
     CONFIG_PROPERTY(int, extraLarge, 28)
 
+    CONFIG_PROPERTY(int, monoSmall, 12)
+    CONFIG_PROPERTY(int, monoMedium, 14)
+    CONFIG_PROPERTY(int, monoLarge, 16)
+
 public:
     explicit FontSizeTokens(QObject* parent = nullptr)
         : ConfigObject(parent) {}
@@ -213,6 +217,8 @@ class LauncherTokens : public ConfigObject {
     CONFIG_PROPERTY(int, itemHeight, 57)
     CONFIG_PROPERTY(int, wallpaperWidth, 280)
     CONFIG_PROPERTY(int, wallpaperHeight, 200)
+    CONFIG_PROPERTY(int, windowSwitcherWidth, 300)
+    CONFIG_PROPERTY(int, windowSwitcherHeight, 220)
 
 public:
     explicit LauncherTokens(QObject* parent = nullptr)
@@ -320,6 +326,10 @@ class NexusTokens : public ConfigObject {
     CONFIG_PROPERTY(int, minWidth, 800)
     CONFIG_PROPERTY(int, minHeight, 500)
     CONFIG_PROPERTY(int, maxNavWidth, 600)
+    CONFIG_PROPERTY(int, maxContentWidth, 800)
+    CONFIG_PROPERTY(int, popupWidth, 300)
+    CONFIG_PROPERTY(int, minPopupHeight, 200)
+    CONFIG_PROPERTY(int, maxPopupHeight, 800)
 
 public:
     explicit NexusTokens(QObject* parent = nullptr)

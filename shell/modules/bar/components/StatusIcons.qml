@@ -16,34 +16,52 @@ StyledRect {
     property color colour: Colours.palette.m3secondary
     readonly property alias items: iconColumn
 
+    readonly property bool isHorizontal: Config.bar.position === "top" || Config.bar.position === "bottom"
+
     color: Colours.tPalette.m3surfaceContainer
     radius: Tokens.rounding.full
 
     clip: true
-    implicitWidth: Tokens.sizes.bar.innerWidth
-    implicitHeight: iconColumn.implicitHeight + Tokens.padding.medium * 2 - (Config.bar.status.showLockStatus && !Hypr.capsLock && !Hypr.numLock ? iconColumn.spacing : 0)
+    implicitWidth: isHorizontal ? (iconColumn.implicitWidth + Tokens.padding.medium * 2) : Tokens.sizes.bar.innerWidth
+    implicitHeight: isHorizontal ? Tokens.sizes.bar.innerWidth : (iconColumn.implicitHeight + Tokens.padding.medium * 2)
 
-    ColumnLayout {
+    GridLayout {
         id: iconColumn
+
+        readonly property real spacing: isHorizontal ? columnSpacing : rowSpacing
 
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: Tokens.padding.medium
+        anchors.bottom: isHorizontal ? undefined : parent.bottom
+        anchors.bottomMargin: isHorizontal ? 0 : Tokens.padding.medium
+        anchors.top: undefined
+        anchors.topMargin: isHorizontal ? Tokens.padding.medium : 0
+        anchors.leftMargin: isHorizontal ? Tokens.padding.medium : 0
+        anchors.rightMargin: isHorizontal ? Tokens.padding.medium : 0
+        anchors.verticalCenter: isHorizontal ? parent.verticalCenter : undefined
 
-        spacing: Tokens.spacing.medium / 2
+        columns: isHorizontal ? -1 : 1
+        rows: isHorizontal ? 1 : -1
+        flow: isHorizontal ? GridLayout.LeftToRight : GridLayout.TopToBottom
+
+        columnSpacing: Tokens.spacing.medium / 2
+        rowSpacing: Tokens.spacing.medium / 2
 
         // Lock keys status
         WrappedLoader {
             name: "lockstatus"
-            active: Config.bar.status.showLockStatus
+            active: Config.bar.status.showLockStatus && (Hypr.capsLock || Hypr.numLock)
 
-            sourceComponent: ColumnLayout {
-                spacing: 0
+            sourceComponent: GridLayout {
+                columns: isHorizontal ? -1 : 1
+                rows: isHorizontal ? 1 : -1
+                flow: isHorizontal ? GridLayout.LeftToRight : GridLayout.TopToBottom
+                columnSpacing: 0
+                rowSpacing: 0
 
                 Item {
-                    implicitWidth: capslockIcon.implicitWidth
-                    implicitHeight: Hypr.capsLock ? capslockIcon.implicitHeight : 0
+                    implicitWidth: isHorizontal ? (Hypr.capsLock ? capslockIcon.implicitWidth : 0) : capslockIcon.implicitWidth
+                    implicitHeight: isHorizontal ? capslockIcon.implicitHeight : (Hypr.capsLock ? capslockIcon.implicitHeight : 0)
 
                     MaterialIcon {
                         id: capslockIcon
@@ -68,15 +86,24 @@ StyledRect {
                     }
 
                     Behavior on implicitHeight {
+                        enabled: !isHorizontal
+
+                        Anim {}
+                    }
+
+                    Behavior on implicitWidth {
+                        enabled: isHorizontal
+
                         Anim {}
                     }
                 }
 
                 Item {
-                    Layout.topMargin: Hypr.capsLock && Hypr.numLock ? iconColumn.spacing : 0
+                    Layout.topMargin: !isHorizontal && Hypr.capsLock && Hypr.numLock ? iconColumn.spacing : 0
+                    Layout.leftMargin: isHorizontal && Hypr.capsLock && Hypr.numLock ? iconColumn.spacing : 0
 
-                    implicitWidth: numlockIcon.implicitWidth
-                    implicitHeight: Hypr.numLock ? numlockIcon.implicitHeight : 0
+                    implicitWidth: isHorizontal ? (Hypr.numLock ? numlockIcon.implicitWidth : 0) : numlockIcon.implicitWidth
+                    implicitHeight: isHorizontal ? numlockIcon.implicitHeight : (Hypr.numLock ? numlockIcon.implicitHeight : 0)
 
                     MaterialIcon {
                         id: numlockIcon
@@ -101,6 +128,14 @@ StyledRect {
                     }
 
                     Behavior on implicitHeight {
+                        enabled: !isHorizontal
+
+                        Anim {}
+                    }
+
+                    Behavior on implicitWidth {
+                        enabled: isHorizontal
+
                         Anim {}
                     }
                 }
@@ -134,7 +169,7 @@ StyledRect {
         // Keyboard layout icon
         WrappedLoader {
             name: "kblayout"
-            active: Config.bar.status.showKbLayout
+            active: Config.bar.status.showKbLayout && (Hypr.kbLayout || "").length > 0
 
             sourceComponent: StyledText {
                 animate: true
@@ -170,13 +205,18 @@ StyledRect {
 
         // Bluetooth section
         WrappedLoader {
-            Layout.preferredHeight: implicitHeight
+            Layout.preferredWidth: isHorizontal ? implicitWidth : -1
+            Layout.preferredHeight: isHorizontal ? -1 : implicitHeight
 
             name: "bluetooth"
             active: Config.bar.status.showBluetooth
 
-            sourceComponent: ColumnLayout {
-                spacing: Tokens.spacing.medium / 2
+            sourceComponent: GridLayout {
+                columns: isHorizontal ? -1 : 1
+                rows: isHorizontal ? 1 : -1
+                flow: isHorizontal ? GridLayout.LeftToRight : GridLayout.TopToBottom
+                columnSpacing: Tokens.spacing.medium / 2
+                rowSpacing: Tokens.spacing.medium / 2
 
                 // Bluetooth icon
                 MaterialIcon {
@@ -230,6 +270,14 @@ StyledRect {
             }
 
             Behavior on Layout.preferredHeight {
+                enabled: !isHorizontal
+
+                Anim {}
+            }
+
+            Behavior on Layout.preferredWidth {
+                enabled: isHorizontal
+
                 Anim {}
             }
         }
@@ -255,13 +303,99 @@ StyledRect {
                 fill: 1
             }
         }
+
+        // Peripheral battery icons
+        WrappedLoader {
+            Layout.preferredWidth: isHorizontal ? implicitWidth : -1
+            Layout.preferredHeight: isHorizontal ? -1 : implicitHeight
+
+            name: "peripheralBattery"
+            active: Config.bar.status.showPeripheralBattery
+
+            sourceComponent: GridLayout {
+                id: peripheralColumn
+
+                readonly property var excluded: Config.bar.status.peripheralBatteryExcluded
+
+                columns: isHorizontal ? -1 : 1
+                rows: isHorizontal ? 1 : -1
+                flow: isHorizontal ? GridLayout.LeftToRight : GridLayout.TopToBottom
+                columnSpacing: Tokens.spacing.medium / 2
+                rowSpacing: Tokens.spacing.medium / 2
+
+                Repeater {
+                    model: ScriptModel {
+                        values: UPower.devices.values.filter(d => !d.isLaptopBattery && d.type !== UPowerDeviceType.LinePower && d.isPresent && !peripheralColumn.excluded.some(e => e === d.model || e === d.nativePath)) // qmllint disable unresolved-type
+                    }
+
+                    MaterialIcon {
+                        required property UPowerDevice modelData
+
+                        animate: true
+                        text: {
+                            if (modelData.state === UPowerDeviceState.Charging || modelData.state === UPowerDeviceState.PendingCharge)
+                                return "battery_charging_full";
+                            if (modelData.state === UPowerDeviceState.FullyCharged)
+                                return "battery_full";
+                            return Icons.getBatteryIcon(modelData.percentage, false);
+                        }
+                        color: modelData.percentage > 0.2 ? root.colour : Colours.palette.m3error
+                        fill: 1
+                    }
+                }
+            }
+
+            Behavior on Layout.preferredHeight {
+                enabled: !isHorizontal
+
+                Anim {}
+            }
+
+            Behavior on Layout.preferredWidth {
+                enabled: isHorizontal
+
+                Anim {}
+            }
+        }
+
+        // Notifications icon
+        WrappedLoader {
+            name: "notifications"
+            active: Config.bar.status.showNotifications
+
+            sourceComponent: MaterialIcon {
+                id: notifIcon
+
+                text: {
+                    if (Notifs.dnd)
+                        return "notifications_off";
+                    if (Notifs.notClosed.length > 0)
+                        return "notifications_unread";
+                    return "notifications";
+                }
+                color: root.colour
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                    onClicked: mouse => {
+                        if (mouse.button === Qt.RightButton) {
+                            Notifs.dnd = !Notifs.dnd;
+                        } else {
+                            const vis = Visibilities.getForActive();
+                            vis.sidebar = !vis.sidebar;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     component WrappedLoader: Loader {
         required property string name
 
-        asynchronous: true
-        Layout.alignment: Qt.AlignHCenter
+        asynchronous: false
+        Layout.alignment: isHorizontal ? Qt.AlignVCenter : Qt.AlignHCenter
         visible: active
     }
 }

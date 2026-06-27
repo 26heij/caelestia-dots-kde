@@ -2,14 +2,17 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Quickshell.Bluetooth
 import Caelestia.Components
 import Caelestia.Config
 import qs.components
 import qs.components.controls
 import qs.services
+import qs.utils
 import qs.modules.nexus
 import qs.modules.bar.popouts as BarPopouts
+import "../../background"
 
 StyledRect {
     id: root
@@ -18,24 +21,34 @@ StyledRect {
     required property BarPopouts.Wrapper popouts
 
     readonly property var quickToggles: {
+        const configToggles = Config.utilities.quickToggles || [];
+        const disabledIds = new Set(configToggles.filter(t => t.enabled === false).map(t => t.id));
+
+        const builtIn = [
+            {
+                id: "badapple"
+            },
+            {
+                id: "pauseWallpaper"
+            }
+        ].filter(t => !disabledIds.has(t.id));
+
+        const allToggles = [...configToggles.filter(t => !disabledIds.has(t.id)), ...builtIn];
         const seenIds = new Set();
 
-        return Config.utilities.quickToggles.filter(item => {
-            if (!(item.enabled ?? true))
+        return allToggles.filter(item => {
+            if (seenIds.has(item.id))
                 return false;
-
-            if (seenIds.has(item.id)) {
-                return false;
-            }
+            seenIds.add(item.id);
 
             if (item.id === "vpn") {
                 return GlobalConfig.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false);
             }
 
-            seenIds.add(item.id);
             return true;
         });
     }
+
     readonly property int splitIndex: Math.ceil(quickToggles.length / 2)
     readonly property bool needExtraRow: quickToggles.length > 6
 
@@ -124,7 +137,7 @@ StyledRect {
                     }
                 }
                 DelegateChoice {
-                    roleValue: "gameMode"
+                    roleValue: "colorpicker"
                     delegate: Toggle {
                         icon: "colorize"
                         inactiveOnColour: Colours.palette.m3onSurfaceVariant
@@ -138,7 +151,7 @@ StyledRect {
                 DelegateChoice {
                     roleValue: "dnd"
                     delegate: Toggle {
-                        icon: Notifs.dnd ? "notifications_off" : "notifications"
+                        icon: "notifications_off"
                         checked: Notifs.dnd
                         onClicked: Notifs.dnd = !Notifs.dnd
                     }
@@ -152,6 +165,48 @@ StyledRect {
                         isToggle: VPN.status.state !== "needs-auth" && VPN.status.state !== "error"
                         inactiveOnColour: Colours.palette.m3onSurfaceVariant
                         onClicked: VPN.toggle()
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "badapple"
+                    delegate: Toggle {
+                        icon: "nutrition"
+                        isToggle: false
+                        inactiveOnColour: Colours.palette.m3onSurfaceVariant
+                        onClicked: {
+                            if (BadApplePlayer.shouldPlay)
+                                BadApplePlayer.stop();
+                            else
+                                BadApplePlayer.play();
+                        }
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "wallpaper"
+                    delegate: Toggle {
+                        icon: "wallpaper"
+                        isToggle: false
+                        inactiveOnColour: Colours.palette.m3onSurfaceVariant
+                        onClicked: {
+                            Visibilities.launcherInitialSearch = `${GlobalConfig.launcher.actionPrefix}wallpaper `;
+                            const visibilities = Visibilities.getForActive();
+                            visibilities.launcher = true;
+                        }
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "pauseWallpaper"
+                    delegate: Toggle {
+                        id: pauseWallpaperToggle
+
+                        icon: "pause"
+                        isToggle: true
+
+                        Component.onCompleted: checked = Qt.binding(() => GlobalConfig.background.videoWallpaperPaused)
+                        onClicked: {
+                            const newVal = !GlobalConfig.background.videoWallpaperPaused;
+                            GlobalConfig.background.videoWallpaperPaused = newVal;
+                        }
                     }
                 }
             }

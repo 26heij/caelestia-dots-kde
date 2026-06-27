@@ -54,6 +54,7 @@ Item {
 
             readonly property Workspace start: root.workspaces.count > 0 ? root.workspaces.itemAt(getWsIdx(modelData.start)) ?? null : null // qmllint disable incompatible-type
             readonly property Workspace end: root.workspaces.count > 0 ? root.workspaces.itemAt(getWsIdx(modelData.end)) ?? null : null // qmllint disable incompatible-type
+            readonly property bool isHorizontal: Config.bar.position === "top" || Config.bar.position === "bottom"
 
             function getWsIdx(ws: int): int {
                 let i = ws - 1;
@@ -62,11 +63,13 @@ Item {
                 return i % Config.bar.workspaces.shown;
             }
 
-            anchors.horizontalCenter: root.horizontalCenter
+            anchors.horizontalCenter: isHorizontal ? undefined : root.horizontalCenter
+            anchors.verticalCenter: isHorizontal ? root.verticalCenter : undefined
 
-            y: (start?.y ?? 0) - 1
-            implicitWidth: Tokens.sizes.bar.innerWidth - Tokens.padding.small + 2
-            implicitHeight: start && end ? end.y + end.size - start.y + 2 : 0
+            x: isHorizontal ? ((start?.x ?? 0) - 1) : 0
+            y: isHorizontal ? 0 : ((start?.y ?? 0) - 1)
+            implicitWidth: isHorizontal ? (start && end ? end.x + end.size - start.x + 2 : 0) : (Tokens.sizes.bar.innerWidth - Tokens.padding.small + 2)
+            implicitHeight: isHorizontal ? (Tokens.sizes.bar.innerWidth - Tokens.padding.small + 2) : (start && end ? end.y + end.size - start.y + 2 : 0)
 
             color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
             radius: Tokens.rounding.full
@@ -80,11 +83,27 @@ Item {
                 }
             }
 
+            Behavior on x {
+                enabled: isHorizontal
+
+                Anim {}
+            }
+
             Behavior on y {
+                enabled: !isHorizontal
+
+                Anim {}
+            }
+
+            Behavior on implicitWidth {
+                enabled: isHorizontal
+
                 Anim {}
             }
 
             Behavior on implicitHeight {
+                enabled: !isHorizontal
+
                 Anim {}
             }
         }

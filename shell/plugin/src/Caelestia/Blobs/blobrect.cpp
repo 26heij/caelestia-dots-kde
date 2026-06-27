@@ -53,6 +53,23 @@ void BlobRect::updatePhysics() {
     }
 
     const float dt = static_cast<float>(m_elapsed.restart()) / 1000.0f;
+
+    // Check for teleport (instant jump > 300px) to prevent spring physics explosion
+    const float dx = static_cast<float>(scenePos.x() - m_prevScenePos.x());
+    const float dy = static_cast<float>(scenePos.y() - m_prevScenePos.y());
+    if (std::sqrt(dx * dx + dy * dy) > 300.0f) {
+        m_prevScenePos = scenePos;
+        m_dm00 = 1.0f;
+        m_dm01 = 0.0f;
+        m_dm11 = 1.0f;
+        m_dmVel00 = m_dmVel01 = m_dmVel11 = 0.0f;
+        m_deformMatrix = QMatrix4x4();
+        m_physicsActive = false;
+        emit rawDeformMatrixChanged();
+        updateCenteredDeformMatrix();
+        return;
+    }
+
     if (dt > 0.1f || dt < 0.001f) {
         m_prevScenePos = scenePos;
         // Still check atRest on skipped frames to avoid getting stuck
@@ -97,20 +114,21 @@ void BlobRect::updatePhysics() {
         target11 = targetStretch * sin2 + targetCompress * cos2;
     }
 
-    // Underdamped spring on each matrix component
+    // Underdamped spring on each matrix component. Damping is integrated implicitly
+    // (the friction term uses the new velocity, solved in closed form) so the 1/(1 + c*dt)
+    // factor stays in (0, 1) for any dt; an explicit -c*v*dt term would flip sign and inject
+    // energy once c*dt > 1 (here dt > ~62ms), making the deformation diverge on slow frames.
     const float kStiffness = static_cast<float>(m_stiffness);
     const float kDamping = static_cast<float>(m_damping);
+    const float invDamp = 1.0f / (1.0f + kDamping * dt);
 
-    const float accel00 = -kStiffness * (m_dm00 - target00) - kDamping * m_dmVel00;
-    m_dmVel00 += accel00 * dt;
+    m_dmVel00 = (m_dmVel00 - kStiffness * (m_dm00 - target00) * dt) * invDamp;
     m_dm00 += m_dmVel00 * dt;
 
-    const float accel01 = -kStiffness * (m_dm01 - target01) - kDamping * m_dmVel01;
-    m_dmVel01 += accel01 * dt;
+    m_dmVel01 = (m_dmVel01 - kStiffness * (m_dm01 - target01) * dt) * invDamp;
     m_dm01 += m_dmVel01 * dt;
 
-    const float accel11 = -kStiffness * (m_dm11 - target11) - kDamping * m_dmVel11;
-    m_dmVel11 += accel11 * dt;
+    m_dmVel11 = (m_dmVel11 - kStiffness * (m_dm11 - target11) * dt) * invDamp;
     m_dm11 += m_dmVel11 * dt;
 
     m_deformMatrix = QMatrix4x4(m_dm00, m_dm01, 0, 0, m_dm01, m_dm11, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);

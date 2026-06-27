@@ -37,6 +37,14 @@ Singleton {
         return true;
     }
 
+    function clear(): void {
+        const toClose = [];
+        for (let i = 0; i < root.list.length; i++)
+            toClose.push(root.list[i]);
+        for (let i = 0; i < toClose.length; i++)
+            toClose[i].close();
+    }
+
     onDndChanged: {
         if (!GlobalConfig.utilities.toasts.dndChanged)
             return;
@@ -99,6 +107,9 @@ Singleton {
                 notification: notif
             });
             root.list = [comp, ...root.list];
+
+            if (!props.dnd && notif.appName !== "caelestia-cli" && !GlobalConfig.audio.sounds.disabledNotifApps.includes(notif.appName))
+                Audio.playNotification();
         }
     }
 
@@ -127,16 +138,12 @@ Singleton {
         // qmllint enable unresolved-type
         name: "clearNotifs"
         description: "Clear all notifications"
-        onPressed: {
-            for (const notif of root.list.slice())
-                notif.close();
-        }
+        onPressed: root.clear()
     }
 
     IpcHandler {
         function clear(): void {
-            for (const notif of root.list.slice())
-                notif.close();
+            root.clear();
         }
 
         function isDndEnabled(): bool {

@@ -12,8 +12,6 @@ QString LyricsBackend::toString(Backend b) {
         return QStringLiteral("LRCLIB");
     case LyricsBackend::NetEase:
         return QStringLiteral("NetEase");
-    case LyricsBackend::Kugou:
-        return QStringLiteral("Kugou");
     default:
         return QStringLiteral("Unknown");
     }

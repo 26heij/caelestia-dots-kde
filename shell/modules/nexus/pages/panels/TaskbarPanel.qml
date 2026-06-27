@@ -2,10 +2,34 @@ pragma ComponentBehavior: Bound
 
 import QtQuick.Layouts
 import Caelestia.Config
+import qs.components.controls
 import qs.modules.nexus.common
 
 PageBase {
     id: root
+
+    readonly property list<MenuItem> positionItems: [
+        MenuItem {
+            property string value: "top"
+
+            text: qsTr("Top")
+        },
+        MenuItem {
+            property string value: "bottom"
+
+            text: qsTr("Bottom")
+        },
+        MenuItem {
+            property string value: "left"
+
+            text: qsTr("Left")
+        },
+        MenuItem {
+            property string value: "right"
+
+            text: qsTr("Right")
+        }
+    ]
 
     title: qsTr("Taskbar")
     isSubPage: true
@@ -23,7 +47,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             first: true
             text: qsTr("Persistent")
             subtext: qsTr("Keep the bar visible at all times")
@@ -31,8 +54,22 @@ PageBase {
             onToggled: GlobalConfig.bar.persistent = checked
         }
 
-        ToggleRow {
+        SelectRow {
             Layout.fillWidth: true
+            label: qsTr("Position")
+            subtext: qsTr("Screen edge to place the bar on")
+            active: {
+                for (let i = 0; i < positionItems.length; i++) {
+                    if (positionItems[i].value === Config.bar.position)
+                        return positionItems[i];
+                }
+                return positionItems[0];
+            }
+            menuItems: positionItems
+            onSelected: item => GlobalConfig.bar.position = item.value
+        }
+
+        ToggleRow {
             text: qsTr("Show on hover")
             subtext: qsTr("Reveal the bar when the cursor reaches the screen edge")
             checked: Config.bar.showOnHover
@@ -40,7 +77,6 @@ PageBase {
         }
 
         StepperRow {
-            Layout.fillWidth: true
             last: true
             label: qsTr("Drag threshold")
             subtext: qsTr("Pixels dragged before the bar reveals")
@@ -58,39 +94,60 @@ PageBase {
 
         NavRow {
             first: true
+            icon: "view_agenda"
+            label: qsTr("Toggle & rearrange")
+            status: qsTr("Add, remove or reorder components")
+            onClicked: root.nState.openSubPage(5)
+        }
+
+        NavRow {
             icon: "workspaces"
             label: qsTr("Workspaces")
             status: qsTr("Indicators, window icons")
-            onClicked: root.nState.openSubPage(5)
+            onClicked: root.nState.openSubPage(6)
         }
 
         NavRow {
             icon: "web_asset"
             label: qsTr("Active window")
             status: qsTr("Title display, popout")
-            onClicked: root.nState.openSubPage(6)
+            onClicked: root.nState.openSubPage(7)
+        }
+
+        NavRow {
+            icon: "dock"
+            label: qsTr("Dock")
+            status: qsTr("Positioning, recoloring")
+            onClicked: root.nState.openSubPage(11)
         }
 
         NavRow {
             icon: "widgets"
             label: qsTr("Tray")
             status: qsTr("System tray icons")
-            onClicked: root.nState.openSubPage(7)
+            onClicked: root.nState.openSubPage(8)
         }
 
         NavRow {
             icon: "signal_cellular_alt"
             label: qsTr("Status icons")
             status: qsTr("Visible indicators")
-            onClicked: root.nState.openSubPage(8)
+            onClicked: root.nState.openSubPage(9)
+        }
+
+        NavRow {
+            icon: "schedule"
+            label: qsTr("Clock")
+            status: qsTr("Date, icon, background")
+            onClicked: root.nState.openSubPage(10)
         }
 
         NavRow {
             last: true
-            icon: "schedule"
-            label: qsTr("Clock")
-            status: qsTr("Date, icon, background")
-            onClicked: root.nState.openSubPage(9)
+            icon: "code"
+            label: qsTr("GitHub")
+            status: qsTr("Contributions, token setup")
+            onClicked: root.nState.openSubPage(12)
         }
 
         // Scroll actions
@@ -99,7 +156,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             first: true
             text: qsTr("Workspaces")
             subtext: qsTr("Scroll over the workspace indicator to switch workspaces")
@@ -108,7 +164,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             text: qsTr("Volume")
             subtext: qsTr("Scroll on the top half of the bar to adjust volume")
             checked: Config.bar.scrollActions.volume
@@ -116,7 +171,6 @@ PageBase {
         }
 
         ToggleRow {
-            Layout.fillWidth: true
             last: true
             text: qsTr("Brightness")
             subtext: qsTr("Scroll on the bottom half of the bar to adjust brightness")

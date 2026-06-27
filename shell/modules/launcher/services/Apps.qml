@@ -11,9 +11,13 @@ Searcher {
     function launch(entry: DesktopEntry): void {
         appDb.incrementFrequency(entry.id);
 
-        // KWin/KDE natively supports perfectly launching apps via their desktop file ID using kstart
-        // This flawlessly handles Terminal=true, working directories, and %u/%f Exec placeholders.
-        Quickshell.execDetached(["kstart", "--application", entry.id]);
+        if (entry.runInTerminal)
+            Quickshell.execDetached({
+                command: [...GlobalConfig.general.apps.terminal, `${Quickshell.shellDir}/assets/wrap_term_launch.sh`, ...entry.command],
+                workingDirectory: entry.workingDirectory
+            });
+        else
+            entry.execute();
     }
 
     function search(search: string): list<var> {

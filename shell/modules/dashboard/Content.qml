@@ -8,6 +8,7 @@ import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.components.filedialog
+import "../../services"
 
 Item {
     id: root
@@ -41,6 +42,12 @@ Item {
                 iconName: "cloud",
                 text: qsTr("Weather"),
                 enabled: Config.dashboard.showWeather
+            },
+            {
+                component: terminalComponent,
+                iconName: "terminal",
+                text: qsTr("Terminal"),
+                enabled: Config.dashboard.showTerminal
             }
         ];
         return allTabs.filter(tab => tab.enabled);
@@ -143,6 +150,7 @@ Item {
                         sourceComponent: modelData.component
 
                         Component.onCompleted: active = Qt.binding(() => {
+                            if (active) return true;
                             if (index === view.currentIndex)
                                 return true;
                             const vx = Math.floor(view.visibleArea.xPosition * view.contentWidth);
@@ -181,6 +189,12 @@ Item {
                 id: weatherComponent
 
                 WeatherTab {}
+            }
+
+            Component {
+                id: terminalComponent
+
+                TerminalTab {}
             }
 
             Behavior on contentX {
