@@ -18,6 +18,9 @@ StyledRect {
     readonly property int spacing: Config.bar.tray.background ? Tokens.spacing.small : 0
 
     property bool expanded
+    property bool pinned: false
+    property var popouts
+
 
     readonly property bool isHorizontal: Config.bar.position === "top" || Config.bar.position === "bottom"
 
@@ -63,6 +66,7 @@ StyledRect {
         spacing: Tokens.spacing.small
 
         opacity: root.expanded || !Config.bar.tray.compact ? 1 : 0
+        enabled: root.expanded || !Config.bar.tray.compact
 
         add: Transition {
             Anim {
@@ -91,7 +95,12 @@ StyledRect {
                 values: SystemTray.items.values.filter(i => !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
             }
 
-            TrayItem {}
+            TrayItem {
+                required property int index
+                trayIndex: index
+                popouts: root.popouts
+                isHorizontal: root.isHorizontal
+            }
         }
 
         Behavior on opacity {
@@ -116,6 +125,12 @@ StyledRect {
         sourceComponent: Item {
             implicitWidth: isHorizontal ? (expandIconInner.implicitWidth - Tokens.padding.small * 2) : expandIconInner.implicitWidth
             implicitHeight: isHorizontal ? expandIconInner.implicitHeight : (expandIconInner.implicitHeight - Tokens.padding.small * 2)
+            TapHandler {
+                onTapped: {
+                    root.pinned = !root.pinned;
+                    root.expanded = root.pinned;
+                }
+            }
 
             MaterialIcon {
                 id: expandIconInner

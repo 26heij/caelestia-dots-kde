@@ -96,8 +96,12 @@ echo "  [OK]  KDE OSDs disabled."
 # ── Apply via lookandfeeltool if Darkly LNF exists (Fonts included) ─────────
 if [[ "${APPLY_FONTS:-true}" == "true" ]]; then
     if command -v lookandfeeltool >/dev/null 2>&1; then
-        echo "  Applying custom fonts and LNF via lookandfeeltool..."
-        lookandfeeltool --apply "Darkly" 2>/dev/null || true
+        if [[ "${APPLY_DARKLY:-true}" == "true" ]]; then
+            echo "  Applying custom fonts and LNF via lookandfeeltool..."
+            lookandfeeltool --apply "Darkly" 2>/dev/null || true
+        else
+            echo "  [SKIP] Skipping Darkly LNF as Darkly theme was opted out. (Fonts must be applied manually)"
+        fi
     fi
 else
     echo "  [SKIP] Skipping custom fonts application."

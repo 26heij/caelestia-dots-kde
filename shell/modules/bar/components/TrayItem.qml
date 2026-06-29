@@ -12,6 +12,9 @@ MouseArea {
     id: root
 
     required property SystemTrayItem modelData
+    property int trayIndex: -1
+    property var popouts
+    property bool isHorizontal: false
     readonly property bool hasMenuEntries: menuOpener.children.values.some(entry => !entry.isSeparator)
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -19,10 +22,15 @@ MouseArea {
     implicitHeight: Tokens.font.body.small.pointSize * 2
 
     onClicked: event => {
-        if (event.button === Qt.LeftButton)
+        if (event.button === Qt.RightButton && !Config.bar.popouts.tray && root.popouts) {
+            root.popouts.currentName = `traymenu${root.trayIndex}`;
+            root.popouts.currentCenter = root.isHorizontal
+                ? root.mapToItem(null, root.implicitWidth / 2, 0).x
+                : root.mapToItem(null, 0, root.implicitHeight / 2).y;
+            root.popouts.hasCurrent = true;
+        } else {
             modelData.activate();
-        else
-            modelData.secondaryActivate();
+        }
     }
 
     QsMenuOpener {
