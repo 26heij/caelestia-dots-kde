@@ -31,7 +31,11 @@ GridLayout {
         for (let i = 0; i < repeater.count; i++) {
             const loader = repeater.itemAt(i) as WrappedLoader;
             if (loader?.enabled && loader.id === "tray") {
-                (loader.item as Tray).expanded = false;
+                const tray = loader.item as Tray;
+                if (Config.bar.popouts.tray || !tray.pinned) {
+                    tray.expanded = false;
+                    tray.pinned = false;
+                }
             }
         }
     }
@@ -44,6 +48,7 @@ GridLayout {
 
         if (!ch) {
             if (popouts.hasCurrent && (popouts.currentName === "dockcontext" || popouts.currentName === "dockhover" || popouts.currentName === "activewindow")) return;
+            if (!Config.bar.popouts.tray && popouts.currentName.startsWith("traymenu")) return;
             popouts.hasCurrent = false;
             return;
         }
@@ -51,7 +56,9 @@ GridLayout {
         const id = ch.id;
         const top = isHorizontal ? ch.x : ch.y;
 
-        if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
+        if (id === "tray" && !Config.bar.popouts.tray) {
+            return;
+        } else if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
             const items = (ch.item as StatusIcons).items;
             const icon = items.childAt(isHorizontal ? mapToItem(items, pos, 0).x : items.width / 2, isHorizontal ? items.height / 2 : mapToItem(items, 0, pos).y);
             if (icon) {
@@ -228,7 +235,9 @@ GridLayout {
                 roleValue: "tray"
                 delegate: WrappedLoader {
                     visible: !root.fullscreen
-                    sourceComponent: Tray {}
+                    sourceComponent: Tray {
+                        popouts: root.popouts
+                    }
                 }
             }
             DelegateChoice {
