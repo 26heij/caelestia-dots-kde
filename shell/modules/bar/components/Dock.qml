@@ -87,9 +87,6 @@ Item {
 
         property var _appsValues: DesktopEntries.applications.values
         on_AppsValuesChanged: root.rebuildModel()
-        HoverHandler {
-            id: dockHover
-        }
 
 
 
