@@ -225,12 +225,41 @@ Then rebuild the shell by running setup.sh again.
      - Sign in to ollama using the link provided in the terminal.
      - Close the terminal and open AI assistant from the sidebar and select the cloud model and start chatting!
   
-  
+</details>  
+
 ---
 
 <div align="center">
     <h2>✦ Troubleshooting ✦</h2>
 </div>
+
+<details>
+  <summary><b>🐞 Viewing Debug Logs & Supported Components</b></summary>
+  <br/>
+
+  Caelestia includes a built-in Debug Mode that enables verbose console logging for various internal components.
+
+  **Enabling Debug Mode:**
+  1. **Via UI**: Open the Nexus settings panel, navigate to the **About** page, and toggle **Debug Mode** under the **Advanced** section.
+  2. **Via Config**: Add `"debugLogs": true` under the `"general"` block in your `~/.config/caelestia/shell.json`.
+
+  After enabling it, reload the shell (`caelestia shell -k` followed by `caelestia shell -d`).
+
+  **Viewing the Logs:**
+  To view the live debug stream in your terminal, run the following command:
+  ```bash
+  caelestia shell -l
+  ```
+
+  **Supported Components:**
+  Currently, the following components log verbose output when Debug Mode is enabled:
+  - **AiAssistant**: Logs tool executions, JSON parsing errors, and Ollama connection statuses.
+  - **WallhavenSearcher**: Logs API requests, search queries, and wallpaper download/move operations.
+  - **DiscordRPC**: Logs connection states and errors for the Discord Rich Presence service.
+  - **BluetoothReconnect**: Logs background device reconnection attempts on startup.
+  - **Nexus StackPage**: Logs internal UI navigation states and errors.
+
+</details>
 
 <details>
   <summary><b>🛠️ Caelestia widgets not appearing</b></summary>
