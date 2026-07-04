@@ -82,6 +82,11 @@ echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━�
 echo
 info "The core shell and bridge scripts have been updated without touching your personal KDE settings."
 echo
-echo -e "${YELLOW}To apply the changes, please restart the shell by running:${RST}"
-echo -e "  caelestia shell -k && caelestia shell"
+echo -e "${YELLOW}Restarting the shell to apply changes...${RST}"
+caelestia shell -k 2>/dev/null || true
+sleep 2
+caelestia shell -d >/dev/null 2>&1 &
+echo -e "${GREEN}Shell restarted successfully!${RST}"
 echo
+echo -e "${YELLOW}If the shell doesn't start, please restart it manually by running: ${GREEN}caelestia shell -d${RST}"
+
