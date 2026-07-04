@@ -21,7 +21,7 @@ echo -e "${CYAN}  Caelestia Update (Branch: $BRANCH)${RST}"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RST}"
 
 # 1. Fetch from GitHub
-echo "PROGRESS: 1/4: Fetching updates from GitHub..."
+echo "PROGRESS: 1/5: Fetching updates from GitHub..."
 info "Cloning latest from GitHub (sparse checkout)..."
 rm -rf "$TMP_DIR"
 mkdir -p "$TMP_DIR"
@@ -36,7 +36,7 @@ echo "scripts/" >> .git/info/sparse-checkout
 git pull -q --depth 1 origin "$BRANCH" || die "Failed to pull repository"
 
 # 2. System update via Polkit
-echo "PROGRESS: 2/4: Running system update..."
+echo "PROGRESS: 2/5: Running system update..."
 echo
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RST}"
 echo -e "${CYAN}  Step 1 — System Updates${RST}"
@@ -58,7 +58,7 @@ sed -i 's/sudo python3/pkexec python3/g' "$TMP_DIR/scripts/08-build-shell.sh"
 export BUNDLE_DIR="$TMP_DIR"
 
 # 4. Deploy Configs
-echo "PROGRESS: 3/4: Deploying configuration files..."
+echo "PROGRESS: 3/5: Deploying configuration files..."
 echo
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RST}"
 echo -e "${CYAN}  Step 2 — Deploy Configs${RST}"
@@ -66,7 +66,7 @@ echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━�
 bash "$TMP_DIR/scripts/03-deploy-configs.sh" || die "Config deployment failed."
 
 # 5. Build Shell
-echo "PROGRESS: 4/4: Building Caelestia Shell UI..."
+echo "PROGRESS: 4/5: Building Caelestia Shell UI..."
 echo
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RST}"
 echo -e "${CYAN}  Step 3 — Build Caelestia Shell UI${RST}"
