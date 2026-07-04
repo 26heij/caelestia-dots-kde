@@ -102,7 +102,9 @@
   <summary><b>💫 Updates</b></summary>
   <br/>
 
-  - Updating is simple, just run `bash update.sh` and select the branch from which you want to update. 
+  - Updating is simple now with integrated experience.
+  - Gui: Open Shell settings -> Updates -> Select the update type (stable or bleeding edge) -> Install Updates
+  - Manual: just run `bash update.sh` and select the branch from which you want to update. 
   - branches: main (stable) and testing (bleeding edge)
   - Shell settings are **not** changed during updates. 
 
@@ -213,7 +215,7 @@ Then rebuild the shell by running setup.sh again.
 </details>
 
 <details>
-  <summary><b> Using the AI Assistant </b></summary>
+  <summary><b>Using the AI Assistant </b></summary>
   </br>
 
   - The AI assistant is powered by Ollama.
