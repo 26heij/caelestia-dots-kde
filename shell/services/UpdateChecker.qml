@@ -26,9 +26,21 @@ Singleton {
         if (!GlobalConfig.general.checkUpdates) return;
         if (branch !== "") currentBranch = branch;
         
-        // 1. Fetch remote commits
-        curlProcess.command = ["curl", "-s", `https://api.github.com/repos/ladybug-me/caelestia-dots-kde/commits?sha=${currentBranch}`];
-        curlProcess.running = true;
+        let bashCmd = `
+REPO="$HOME/.cache/caelestia-update-repo"
+if [ ! -d "$REPO" ]; then
+    git clone --bare --filter=blob:none https://github.com/ladybug-me/caelestia-dots-kde.git "$REPO" >/dev/null 2>&1
+else
+    git -C "$REPO" fetch origin ${currentBranch}:${currentBranch} >/dev/null 2>&1
+fi
+if [ -n "${root._localCommit}" ]; then
+    git -C "$REPO" log --format="%h|%s|%an|%cI" ${root._localCommit}..${currentBranch} 2>/dev/null || echo ""
+else
+    echo ""
+fi
+`
+        gitProcess.command = ["bash", "-c", bashCmd];
+        gitProcess.running = true;
     }
 
     // Process to read local commit
@@ -46,30 +58,26 @@ Singleton {
     }
 
     Process {
-        id: curlProcess
+        id: gitProcess
         command: []
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
-                    const data = JSON.parse(text);
-                    if (!Array.isArray(data)) return;
-                    
+                    const lines = text.trim().split("\n");
                     const parsedCommits = [];
-                    let foundLocal = false;
                     
-                    for (let i = 0; i < data.length; i++) {
-                        const c = data[i];
-                        if (root._localCommit && c.sha === root._localCommit) {
-                            foundLocal = true;
-                            break;
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (line === "") continue;
+                        const parts = line.split("|");
+                        if (parts.length >= 4) {
+                            parsedCommits.push({
+                                hash: parts[0],
+                                subject: parts[1],
+                                author: parts[2],
+                                date: new Date(parts[3]).toLocaleString(Qt.locale(), Locale.ShortFormat)
+                            });
                         }
-                        
-                        parsedCommits.push({
-                            hash: c.sha.substring(0, 7),
-                            subject: c.commit.message.split("\n")[0],
-                            author: c.commit.author.name,
-                            date: new Date(c.commit.author.date).toLocaleString(Qt.locale(), Locale.ShortFormat)
-                        });
                     }
                     
                     root.commits = parsedCommits;
@@ -81,7 +89,7 @@ Singleton {
                         Toaster.toast(qsTr("System Update Available"), qsTr("%1 new commits on %2 branch").arg(root.pendingCount).arg(root.currentBranch), "update");
                     }
                 } catch(e) {
-                    console.log("UpdateChecker JSON parse error:", e);
+                    console.log("UpdateChecker git parse error:", e);
                 }
             }
         }

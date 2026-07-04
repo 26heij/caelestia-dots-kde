@@ -17,13 +17,18 @@ PageBase {
     
     title: qsTr("Updates")
 
-    readonly property var branchItems: UpdateChecker.availableBranches.map(b => ({
-        label: b,
-        value: b,
-        icon: "call_split"
-    }))
+    readonly property list<MenuItem> branchItems: [
+        MenuItem {
+            text: "main"
+            icon: "call_split"
+        },
+        MenuItem {
+            text: "testing"
+            icon: "call_split"
+        }
+    ]
 
-    readonly property var activeBranchItem: branchItems.find(i => i.value === UpdateChecker.currentBranch) || branchItems[0]
+    readonly property var activeBranchItem: branchItems.find(i => i.text === UpdateChecker.currentBranch) || branchItems[0]
 
     property string updateLogs: ""
     property bool updateRunning: false
@@ -84,7 +89,7 @@ PageBase {
             menuItems: root.branchItems
             active: root.activeBranchItem
             onSelected: item => {
-                UpdateChecker.checkUpdates(item.value);
+                UpdateChecker.checkUpdates(item.text);
             }
         }
 
