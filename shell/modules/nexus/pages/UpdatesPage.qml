@@ -138,16 +138,20 @@ PageBase {
 
                 IconTextButton {
                     Layout.fillWidth: true
-                    text: root.updateRunning ? qsTr("Updating...") : qsTr("Install & Restart Shell")
+                    text: root.updateRunning ? qsTr("Updating...") : (root.updateProgress === 1.0 ? qsTr("Log Out") : qsTr("Install Update"))
                     type: TextButton.Primary
-                    icon: root.updateRunning ? "hourglass_empty" : "system_update_alt"
-                    enabled: !root.updateRunning && UpdateChecker.hasUpdate
+                    icon: root.updateRunning ? "hourglass_empty" : (root.updateProgress === 1.0 ? "logout" : "system_update_alt")
+                    enabled: (!root.updateRunning && UpdateChecker.hasUpdate) || root.updateProgress === 1.0
                     onClicked: {
-                        root.updateLogs = "";
-                        root.updateProgress = 0.0;
-                        root.updateStatus = "Starting update...";
-                        root.updateRunning = true;
-                        updateProcess.running = true;
+                        if (root.updateProgress === 1.0) {
+                            logoutProcess.running = true;
+                        } else {
+                            root.updateLogs = "";
+                            root.updateProgress = 0.0;
+                            root.updateStatus = "Starting update...";
+                            root.updateRunning = true;
+                            updateProcess.running = true;
+                        }
                     }
                 }
 
@@ -241,12 +245,9 @@ PageBase {
             onExited: code => {
                 root.updateRunning = false;
                 if (code === 0) {
-                    Toaster.toast(qsTr("Update Successful"), qsTr("The shell has been updated. Restarting..."), "done");
+                    Toaster.toast(qsTr("Update Successful"), qsTr("The update is complete. Please log out to apply changes."), "done");
                     UpdateChecker.loaded = false; // Reset to force re-read
                     UpdateChecker.checkUpdates();
-                    
-                    // Restart shell automatically
-                    restartProcess.running = true;
                 } else {
                     Toaster.toast(qsTr("Update Failed"), qsTr("The update script returned error code %1").arg(code), "error");
                 }
@@ -254,8 +255,8 @@ PageBase {
         }
 
         Process {
-            id: restartProcess
-            command: ["bash", "-c", "nohup sh -c 'sleep 2; caelestia shell -d' >/dev/null 2>&1 & caelestia shell -k"]
+            id: logoutProcess
+            command: ["qdbus6", "org.kde.Shutdown", "/Shutdown", "org.kde.Shutdown.logout"]
         }
     }
 }
