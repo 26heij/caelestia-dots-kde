@@ -214,31 +214,27 @@ PageBase {
             id: updateProcess
             command: ["bash", "-c", `${Paths.absolutePath("~/.local/bin/caelestia-update")} ${UpdateChecker.currentBranch}`]
             
-            stdout: StdioCollector {
-                onTextChanged: {
-                    root.updateLogs = text;
-                    const lines = text.split("\n");
-                    for (let i = lines.length - 1; i >= 0; i--) {
-                        if (lines[i].startsWith("PROGRESS: ")) {
-                            const pText = lines[i].substring(10);
-                            if (pText.startsWith("done")) {
-                                root.updateProgress = 1.0;
-                                root.updateStatus = "Done!";
-                            } else {
-                                const match = pText.match(/^(\d+)\/(\d+): (.+)$/);
-                                if (match) {
-                                    root.updateProgress = parseInt(match[1]) / parseInt(match[2]);
-                                    root.updateStatus = match[3];
-                                }
+            stdout: SplitParser {
+                onRead: text => {
+                    root.updateLogs += text + "\n";
+                    if (text.startsWith("PROGRESS: ")) {
+                        const pText = text.substring(10);
+                        if (pText.startsWith("done")) {
+                            root.updateProgress = 1.0;
+                            root.updateStatus = "Done!";
+                        } else {
+                            const match = pText.match(/^(\d+)\/(\d+): (.+)$/);
+                            if (match) {
+                                root.updateProgress = parseInt(match[1]) / parseInt(match[2]);
+                                root.updateStatus = match[3];
                             }
-                            break;
                         }
                     }
                 }
             }
-            stderr: StdioCollector {
-                onTextChanged: {
-                    // Ignore stderr or append, but StdioCollector accumulates on its own.
+            stderr: SplitParser {
+                onRead: text => {
+                    root.updateLogs += text + "\n";
                 }
             }
             
