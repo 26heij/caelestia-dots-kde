@@ -701,7 +701,7 @@ read -r -p "Would you like to log out now? (y/N): " response
 case "$response" in
     [yY][eE][sS]|[yY])
         echo "Logging out..."
-        qdbus6 org.kde.Shutdown /Shutdown org.kde.Shutdown.logout 2>/dev/null || true
+        qdbus6 org.kde.Shutdown /Shutdown org.kde.Shutdown.logout 2>/dev/null
         ;;
     *)
         echo "Exiting script. Please remember to log out manually later."
