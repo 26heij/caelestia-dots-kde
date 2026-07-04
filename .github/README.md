@@ -102,7 +102,8 @@
   <summary><b>💫 Updates</b></summary>
   <br/>
 
-  - Updating is simple, just clone the latest version and run the installer.
+  - Updating is simple, just run `bash update.sh` and select the branch from which you want to update. 
+  - branches: main (stable) and testing (bleeding edge)
   - Shell settings are **not** changed during updates. 
 
 
@@ -197,6 +198,34 @@
   - *Note:* You may need to update `~/.local/bin/hyprctl` for `Super + /` keybindings display.
 - **The Greeter:** The gifs that play on popout of `Good Morning, User` can be customized by going to [`shell/assets/`](https://github.com/ladybug-me/caelestia-dots-kde/tree/main/shell/assets/) and replacing the [morning.gif](https://github.com/ladybug-me/caelestia-dots-kde/blob/main/shell/assets/morning.gif), [evening.gif](https://github.com/ladybug-me/caelestia-dots-kde/blob/main/shell/assets/evening.gif), [afternoon.gif](https://github.com/ladybug-me/caelestia-dots-kde/blob/main/shell/assets/afternoon.gif) and [night.gif](https://github.com/ladybug-me/caelestia-dots-kde/blob/main/shell/assets/night.gif) files.
 Then rebuild the shell by running setup.sh again.
+---
+
+<div align="center">
+    <h2>✦ Instructions ✦</h2>
+</div>
+<details>
+  <summary><b>Removing the bottom panel </b></summary>
+  <br/>
+  
+  - The bottom panel might hide behind the quickshell bar. 
+  - In that case, Press Super+D → Right-click the panel → "Panel configuration" → remove every existing KDE panel for optimal behaviour with the Quickshell bar.
+  
+</details>
+
+<details>
+  <summary><b> Using the AI Assistant </b></summary>
+  </br>
+
+  - The AI assistant is powered by Ollama.
+  - Check instructions for ollama installation at [Ollama](https://ollama.com/)
+  - Download any model you want by using the command `ollama pull <model name>` 
+  - e.g. `ollama pull gemma4` 
+  - **If you want to use cloud models**
+     - Open terminal and run `ollama run gemma4:cloud` or anyother model (see [cloud models](https://ollama.com/search?c=cloud) for available models).
+     - Sign in to ollama using the link provided in the terminal.
+     - Close the terminal and open AI assistant from the sidebar and select the cloud model and start chatting!
+  
+  
 ---
 
 <div align="center">

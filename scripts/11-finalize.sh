@@ -93,7 +93,7 @@ echo -e "     Quickshell changes."
 echo -e "  ${YELLOW}WARNING:${RST}If a kernel update occured, ${YELLOW}===reboot===${RST} immediately."
 echo
 echo -e "  ${MAGENTA}2. REMOVE ALL KDE PANELS${RST} after logging back in."
-echo -e "     Right-click the panel → \"Panel configuration\" → remove"
+echo -e "     Press Super+D → Right-click the panel → \"Panel configuration\" → remove"
 echo -e "     every existing KDE panel for optimal behaviour with"
 echo -e "     the Quickshell bar."
 echo
