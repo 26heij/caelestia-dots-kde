@@ -109,6 +109,11 @@ Item {
             var end = text.indexOf(endTag, start);
             if (end === -1) break;
             var jsonStr = text.substring(start + startTag.length, end).trim();
+            // Remove markdown code block fences if the model included them
+            jsonStr = jsonStr.replace(/^```[a-zA-Z]*\n?/, "");
+            jsonStr = jsonStr.replace(/```$/, "");
+            jsonStr = jsonStr.trim();
+
             try {
                 var parsed = JSON.parse(jsonStr);
                 if (parsed.name) calls.push(parsed);

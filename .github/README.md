@@ -200,6 +200,34 @@ Then rebuild the shell by running setup.sh again.
 ---
 
 <div align="center">
+    <h2>✦ Instructions ✦</h2>
+</div>
+<details>
+  <summary><b>Removing the bottom panel </b></summary>
+  <br/>
+  
+  - The bottom panel might hide behind the quickshell bar. 
+  - In that case, Press Super+D → Right-click the panel → "Panel configuration" → remove every existing KDE panel for optimal behaviour with the Quickshell bar.
+  
+</details>
+
+<details>
+  <summary><b> Using the AI Assistant </b></summary>
+  </br>
+
+  - The AI assistant is powered by Ollama.
+  - Check instructions for ollama installation at [Ollama](https://ollama.com/)
+  - Download any model you want by using the command `ollama pull <model name>` 
+  - e.g. `ollama pull gemma4` 
+  - **If you want to use cloud models**
+     - Open terminal and run `ollama run gemma4:cloud` or anyother model (see [cloud models](https://ollama.com/search?c=cloud) for available models).
+     - Sign in to ollama using the link provided in the terminal.
+     - Close the terminal and open AI assistant from the sidebar and select the cloud model and start chatting!
+  
+  
+---
+
+<div align="center">
     <h2>✦ Troubleshooting ✦</h2>
 </div>
 
