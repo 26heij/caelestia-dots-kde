@@ -14,6 +14,7 @@
 #include <QTemporaryFile>
 #include <QStringList>
 #include <QProcess>
+#include <QDateTime>
 
 QJsonArray parseKeyd() {
     QJsonArray binds;
@@ -192,7 +193,7 @@ QJsonArray getMonitors() {
 }
 
 void runKWinScript(const QString& scriptCode) {
-    QTemporaryFile tempFile;
+    QTemporaryFile tempFile(QDir::tempPath() + "/qs-action-XXXXXX.js");
     if (!tempFile.open()) return;
     tempFile.write(scriptCode.toUtf8());
     tempFile.close();
@@ -201,10 +202,15 @@ void runKWinScript(const QString& scriptCode) {
     if (!kwinInterface.isValid()) return;
     
     // We must load, start, and unload the script
-    QString tempName = "qs-action-temp";
-    kwinInterface.call("loadScript", tempFile.fileName(), tempName);
-    kwinInterface.call("start");
-    kwinInterface.call("unloadScript", tempName);
+    QString tempName = "qs-action-" + QString::number(QCoreApplication::applicationPid()) + "-" + QString::number(QDateTime::currentMSecsSinceEpoch());
+    QDBusReply<int> r1 = kwinInterface.call("loadScript", tempFile.fileName(), tempName);
+    if (!r1.isValid()) std::cerr << "loadScript failed: " << r1.error().message().toStdString() << std::endl;
+    
+    QDBusReply<void> r2 = kwinInterface.call("start");
+    if (!r2.isValid()) std::cerr << "start failed: " << r2.error().message().toStdString() << std::endl;
+    
+    QDBusReply<bool> r3 = kwinInterface.call("unloadScript", tempName);
+    if (!r3.isValid()) std::cerr << "unloadScript failed: " << r3.error().message().toStdString() << std::endl;
 }
 
 void dispatchCommand(const QString& cmd, const QString& arg) {
@@ -327,7 +333,13 @@ int main(int argc, char *argv[]) {
         if (args[1] == "dispatch" && args.size() >= 4) {
             dispatchCommand(args[2], args[3]);
         } else if (args[1] == "dispatch" && args.size() == 3) {
-            dispatchCommand(args[2], "");
+            QString fullCmd = args[2].trimmed();
+            int spaceIdx = fullCmd.indexOf(' ');
+            if (spaceIdx != -1) {
+                dispatchCommand(fullCmd.left(spaceIdx), fullCmd.mid(spaceIdx + 1).trimmed());
+            } else {
+                dispatchCommand(fullCmd, "");
+            }
         }
         return 0;
     }

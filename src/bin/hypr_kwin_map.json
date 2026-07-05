@@ -10,7 +10,7 @@
   "verbs": {
     "focuswindow": {
       "args": ["address"],
-      "kwin_action": "workspace.activeWindow = w;"
+      "kwin_action": "w.minimized = false; workspace.activeWindow = w;"
     },
     "closewindow": {
       "args": ["address"],
