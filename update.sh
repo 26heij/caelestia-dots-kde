@@ -90,7 +90,8 @@ echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━�
 echo
 info "The core shell and bridge scripts have been updated without touching your personal KDE settings."
 echo
-echo -e "${YELLOW}Restarting the shell to apply changes...${RST}"
+echo -e "${YELLOW}Restarting bridge and shell to apply changes...${RST}"
+systemctl --user restart qs-kwin-bridge.service 2>/dev/null || true
 caelestia shell -k 2>/dev/null || true
 sleep 2
 caelestia shell -d >/dev/null 2>&1 &

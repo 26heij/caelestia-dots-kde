@@ -9,6 +9,12 @@ Thanks for your interest in contributing to the KDE Plasma port!
 - We can accept features we don't personally use, but they **must be configurable** (off by default for experimental features)
 - For **big changes**, please open an issue first to discuss—it saves effort for everyone
 
+### Hyprland to KWin Mapping
+If you are adding a new feature to the UI (QML) that uses a `hyprctl dispatch` command, you **must** register that command in our JSON translation layer.
+1. Open `src/bin/hypr_kwin_map.json`.
+2. Add your new dispatch verb under the `"verbs"` section.
+3. Provide the expected arguments (`args`) and the KWin DBus Javascript equivalent (`kwin_action`).
+4. Run `python3 .github/scripts/test_hypr_shim.py` locally to verify that all commands in the QML codebase are correctly mapped. Failure to do this will cause the CI build to fail.
 ## Translations
 
 See `src/config/quickshell/ii/translations/tools` for translation files.
@@ -60,11 +66,6 @@ _For testing Quickshell widget changes without a full KDE installation:_
 - **VSCode**: Install the official "Qt Qml" extension, then set `qmlls` custom exe path to `/usr/bin/qmlls6` in settings
 - **Live reload**: Changes to `.qml` files reload automatically when saved
 
-### Python Scripts
-
-If your changes involve Python scripts or packages:
-- Use the virtual environment created by `uv` (see `sdata/uv/README.md`)
-- Run: `cd sdata/uv && nix-shell` (or use `uv venv`)
 
 ## Testing Your Changes
 
@@ -78,3 +79,11 @@ If your changes involve Python scripts or packages:
 
 **For KDE settings:**
 - Re-run the relevant installation step or manually test with `kwriteconfig6`
+
+## Security & Conventions
+
+- **Shell Execution Security**: When invoking shell scripts via `Quickshell.execDetached` or `Process {}`, prefer argv arrays or positional `$1`/`$2` args over string-concatenated shell commands to prevent injection footguns.
+  - **Good**: `Quickshell.execDetached(["bash", "-c", "echo \"$1\"", "--", myVar]);`
+  - **Bad**: `Quickshell.execDetached(["bash", "-c", "echo " + myVar]);`
+- **Temporary Files**: Do not hardcode `/tmp/` paths. Instead, use the `Paths.runtimeTemp("filename")` helper from `qs.utils` to safely place temp files in the user's `XDG_RUNTIME_DIR`. This prevents permission clashes on multi-user systems.
+- **IPC Parsing**: When writing custom C++ D-Bus or IPC listeners (e.g. `discordipc.cpp`), always validate frame length prefixes before reading from the buffer to prevent infinite loops from malicious or malformed payloads.
