@@ -52,9 +52,14 @@ mkdir -p \
 
 # bin scripts
 if [[ -d "$SRC_DIR/bin" ]]; then
-    cp "$SRC_DIR/bin/"* "$HOME/.local/bin/" 2>/dev/null || true
-    chmod +x "$HOME/.local/bin/hyprctl" \
-              "$HOME/.local/bin/kcolorpicker" \
+    # Copy scripts, but skip C++ source files and build files
+    for file in "$SRC_DIR/bin/"*; do
+        if [[ ! "$file" == *.cpp && ! "$file" == *CMakeLists.txt && ! -d "$file" ]]; then
+            cp "$file" "$HOME/.local/bin/" 2>/dev/null || true
+        fi
+    done
+    
+    chmod +x "$HOME/.local/bin/kcolorpicker" \
               "$HOME/.local/bin/qs-kwin-bridge.py" 2>/dev/null || true
 fi
 

@@ -9,6 +9,12 @@ Thanks for your interest in contributing to the KDE Plasma port!
 - We can accept features we don't personally use, but they **must be configurable** (off by default for experimental features)
 - For **big changes**, please open an issue first to discuss—it saves effort for everyone
 
+### Hyprland to KWin Mapping
+If you are adding a new feature to the UI (QML) that uses a `hyprctl dispatch` command, you **must** register that command in our JSON translation layer.
+1. Open `src/bin/hypr_kwin_map.json`.
+2. Add your new dispatch verb under the `"verbs"` section.
+3. Provide the expected arguments (`args`) and the KWin DBus Javascript equivalent (`kwin_action`).
+4. Run `python3 .github/scripts/test_hypr_shim.py` locally to verify that all commands in the QML codebase are correctly mapped. Failure to do this will cause the CI build to fail.
 ## Translations
 
 See `src/config/quickshell/ii/translations/tools` for translation files.

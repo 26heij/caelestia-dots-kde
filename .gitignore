@@ -11,3 +11,4 @@
 
 .SRCINFO
 backups/
+src/bin/build/

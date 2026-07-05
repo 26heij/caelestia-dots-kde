@@ -64,7 +64,17 @@ mkdir -p ~/.local/bin ~/.local/share/kwin/scripts ~/.config/systemd/user
 
 # Install python bridge and hyprctl mock
 if [ -d "$BUNDLE_DIR/src/bin" ]; then
-    cp "$BUNDLE_DIR/src/bin/"* ~/.local/bin/
+    info "Building C++ hyprctl shim..."
+    mkdir -p "$BUNDLE_DIR/src/bin/build"
+    cd "$BUNDLE_DIR/src/bin/build"
+    cmake ..
+    make -j$(nproc)
+    cp hyprctl ~/.local/bin/
+    cd "$BUNDLE_DIR"
+    rm -rf "$BUNDLE_DIR/src/bin/build"
+    
+    cp "$BUNDLE_DIR/src/bin/hypr_kwin_map.json" ~/.local/bin/
+    cp "$BUNDLE_DIR/src/bin/qs-kwin-bridge.py" ~/.local/bin/ 2>/dev/null || true
     chmod +x ~/.local/bin/hyprctl ~/.local/bin/qs-kwin-bridge.py
 fi
 
