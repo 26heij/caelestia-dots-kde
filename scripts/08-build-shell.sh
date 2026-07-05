@@ -94,17 +94,10 @@ sudo -v || exit 1
 SUDO_LOOP_PID=$!
 trap 'kill $SUDO_LOOP_PID 2>/dev/null || true' EXIT
 
-info "Checking for broken spectacle dependencies..."
-if ! /usr/bin/spectacle -h >/dev/null 2>&1; then
-    warn "Spectacle is missing OpenCV dependencies. Attempting to fix by symlinking..."
-    if [ -f "/usr/lib/libopencv_imgproc.so.5.0.0" ]; then
-        sudo ln -sf /usr/lib/libopencv_imgproc.so.5.0.0 /usr/lib/libopencv_imgproc.so.413
-    fi
-    if [ -f "/usr/lib/libopencv_core.so.5.0.0" ]; then
-        sudo ln -sf /usr/lib/libopencv_core.so.5.0.0 /usr/lib/libopencv_core.so.413
-    fi
-    ok "Spectacle OpenCV fix applied."
-fi
+echo "Fixing opencv build failure"
+sudo ln -sf /usr/lib/libopencv_imgproc.so.5.0.0 /usr/lib/libopencv_imgproc.so.413
+sudo ln -sf /usr/lib/libopencv_core.so.5.0.0 /usr/lib/libopencv_core.so.413
+
 
 if ! sudo python3 -c '
 import sys, os, glob
