@@ -26,11 +26,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cat << 'EOF' > release_notes.md
-          # ✧ C A E L E S T I A ✧ Rolling Release
 
-          > *“Ad astra per aspera.”*
-
-          ### 🌠 What's New in v2.0.0
+          ### 🌠 What's New in v2.0.1
 
           - 🌙 **Bar**: MacOS-style app dock, Configurable Panel Position, Material workspace icons, DND toggle, and a live drag-and-drop components editor.
           - ☄️ **Launchers**: Emoji Picker, Clipboard History, Window Switcher, and Hyprland Keybinds.
