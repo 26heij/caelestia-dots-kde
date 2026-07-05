@@ -197,6 +197,29 @@ Singleton {
         });
     }
 
+    function executeShellCommand(cmd: list<string>, env: var, callback: var): void {
+        const proc = commandProc.createObject(root);
+        proc.cmdArgs = cmd;
+        if (env) {
+            proc.environment = Object.assign({}, proc.environment, env);
+        }
+        proc.callback = callback;
+
+        activeProcesses.push(proc);
+
+        proc.processFinished.connect(() => {
+            const index = activeProcesses.indexOf(proc);
+            if (index >= 0) {
+                activeProcesses.splice(index, 1);
+            }
+            proc.destroy();
+        });
+
+        Qt.callLater(() => {
+            proc.exec(proc.cmdArgs);
+        });
+    }
+
     function getDeviceStatus(callback: var): void {
         executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
             if (callback)
@@ -391,14 +414,9 @@ Singleton {
             return;
         }
 
-        let cmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid];
-        if (password && password.length > 0) {
-            cmd.push(root.connectionParamPassword, password);
-        }
-        executeCommand(cmd, result => {
+        const handleResult = result => {
             if (result.needsPassword && callback) {
-                if (callback)
-                    callback(result);
+                callback(result);
                 return;
             }
 
@@ -411,32 +429,23 @@ Singleton {
                 if (callback)
                     callback(result);
             }
-        });
+        };
+
+        if (password && password.length > 0) {
+            const cmd = ["bash", "-c", '"$@" <<< "$WIFI_PASSWORD"', "--", "nmcli", "--ask", root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid];
+            executeShellCommand(cmd, { "WIFI_PASSWORD": password }, handleResult);
+        } else {
+            const cmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid];
+            executeCommand(cmd, handleResult);
+        }
     }
 
     function createConnectionWithPassword(ssid: string, bssidUpper: string, password: string, callback: var): void {
         checkAndDeleteConnection(ssid, () => {
-            const cmd = [root.nmcliCommandConnection, "add", root.connectionParamType, root.deviceTypeWifi, root.connectionParamConName, ssid, root.connectionParamIfname, "*", root.connectionParamSsid, ssid, root.connectionParamBssid, bssidUpper, root.securityKeyMgmt, root.keyMgmtWpaPsk, root.securityPsk, password];
-
-            executeCommand(cmd, result => {
-                if (result.success) {
-                    loadSavedConnections(() => {});
-                    activateConnection(ssid, callback);
-                } else {
-                    const hasDuplicateWarning = result.error && (result.error.includes("another connection with the name") || result.error.includes("Reference the connection by its uuid"));
-
-                    if (hasDuplicateWarning || (result.exitCode > 0 && result.exitCode < 10)) {
-                        loadSavedConnections(() => {});
-                        activateConnection(ssid, callback);
-                    } else {
-                        console.warn(lc, "Connection profile creation failed, trying fallback...");
-                        let fallbackCmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid, root.connectionParamPassword, password];
-                        executeCommand(fallbackCmd, fallbackResult => {
-                            if (callback)
-                                callback(fallbackResult);
-                        });
-                    }
-                }
+            const cmd = ["bash", "-c", '"$@" <<< "$WIFI_PASSWORD"', "--", "nmcli", "--ask", root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid, "bssid", bssidUpper];
+            executeShellCommand(cmd, { "WIFI_PASSWORD": password }, result => {
+                loadSavedConnections(() => {});
+                if (callback) callback(result);
             });
         });
     }
