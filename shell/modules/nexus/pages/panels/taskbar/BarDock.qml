@@ -68,7 +68,7 @@ PageBase {
             subtext: qsTr("Size of app icons in the dock")
             value: Config.bar.dock.iconSize
             from: 20
-            to: 64
+            to: Math.max(20, Tokens.sizes.bar.innerWidth)
             stepSize: 2
             onMoved: v => GlobalConfig.bar.dock.iconSize = v
         }

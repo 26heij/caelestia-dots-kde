@@ -63,10 +63,7 @@ Item {
         root.modelDataArray = newArr;
     }
 
-    readonly property int padding: Tokens.padding.medium
-    readonly property int spacing: Tokens.spacing.small
-    readonly property real configuredItemSize: Math.max(16, Config.bar.dock.iconSize || 32)
-
+    readonly property real configuredItemSize: Math.max(16, Math.min(Tokens.sizes.bar.innerWidth, Config.bar.dock.iconSize || 32))
     StyledRect {
         id: container
 
