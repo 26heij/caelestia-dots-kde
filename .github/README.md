@@ -106,7 +106,7 @@
   - Updating is simple now with integrated experience.
   - **Gui**: Open Shell settings -> Updates -> Select the update type (stable or bleeding edge) -> Install Updates
   - **Manual**: just run `bash update.sh` and select the branch from which you want to update. 
-  - branches: main (stable) and testing (bleeding edge)
+  - branches: main (stable) and dev (bleeding edge)
   - Shell settings are **not** changed during updates. 
 
 
