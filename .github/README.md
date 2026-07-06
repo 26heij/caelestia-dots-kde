@@ -241,6 +241,26 @@ Then rebuild the shell by running setup.sh again.
 </div>
 
 <details>
+  <summary><b>❌️ Critical Error Handling</b></summary>
+  <br/>
+
+  If something got **really messed up** (setup broken, build error, great panic..)
+
+  **Complete Shell Reset**
+  1. **Get Access to a terminal**: Win+Enter or Alt+Ctl+T or The last hope tty: Ctl + Alt + F3 or any other Fn key that works.
+  2. **Uninstall.sh**: Open terminal where setup.sh is, run `bash uninstall.sh`. **NOTE**: Enter `0` when it asks for which backup to restore.
+  3. **Delete all shell files**: Run `rm -rf ~/.config/caelestia ~/.config/quickshell`. Also delete the cloned repo folder.
+  4. **Reboot**: Run `reboot` (May be a laggy one, if stuck, do a power on off). You will be seeing a wallpaper only after restarting with light theme 👀. Its the normal KDE shell without any panels. You can add any panels if you want by `Right Click -> Edit Mode`.
+  5. **Clone the latest main repo**: Run
+     ```bash
+     git clone -b main --single-branch --depth 1 https://github.com/ladybug-me/caelestia-dots-kde ~/caelestia
+     cd ~/caelestia
+     bash setup.sh
+     ```
+  7. **Reboot**: Run `reboot` and you are back with a stable environment once again.
+    
+</details>
+<details>
   <summary><b>🐞 Viewing Debug Logs & Supported Components</b></summary>
   <br/>
 
