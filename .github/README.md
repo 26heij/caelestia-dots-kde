@@ -101,10 +101,11 @@
 <details> 
   <summary><b>💫 Updates</b></summary>
   <br/>
-
+    
+    NOTE: You must backup your ~/.config if you have made changes to the dot or shell files
   - Updating is simple now with integrated experience.
-  - Gui: Open Shell settings -> Updates -> Select the update type (stable or bleeding edge) -> Install Updates
-  - Manual: just run `bash update.sh` and select the branch from which you want to update. 
+  - **Gui**: Open Shell settings -> Updates -> Select the update type (stable or bleeding edge) -> Install Updates
+  - **Manual**: just run `bash update.sh` and select the branch from which you want to update. 
   - branches: main (stable) and testing (bleeding edge)
   - Shell settings are **not** changed during updates. 
 
