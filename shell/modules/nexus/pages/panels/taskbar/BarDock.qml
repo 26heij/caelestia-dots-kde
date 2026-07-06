@@ -62,6 +62,17 @@ PageBase {
             onToggled: GlobalConfig.bar.dock.monitorCenter = checked
         }
 
+        StepperRow {
+            Layout.fillWidth: true
+            label: qsTr("Icon size")
+            subtext: qsTr("Size of app icons in the dock")
+            value: Config.bar.dock.iconSize
+            from: 20
+            to: Math.max(20, Tokens.sizes.bar.innerWidth)
+            stepSize: 2
+            onMoved: v => GlobalConfig.bar.dock.iconSize = v
+        }
+
         ToggleRow {
             Layout.fillWidth: true
             last: true
