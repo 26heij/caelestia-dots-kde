@@ -45,7 +45,7 @@ Singleton {
                 ["behavior", "behaviour"]
             ];
 
-        const escapeRegExp = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         let normalized = text;
         for (const [from, to] of rules)
             normalized = normalized.replace(new RegExp(`\\b${escapeRegExp(from)}\\b`, "g"), to);
