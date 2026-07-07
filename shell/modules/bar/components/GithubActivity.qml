@@ -23,7 +23,7 @@ StyledRect {
     readonly property int padding: Config.bar.github.background ? Tokens.padding.medium : Tokens.padding.small
     readonly property int cellSize: 12
     readonly property int cellSpacing: Tokens.spacing.small
-    readonly property int barThickness: Math.round(Tokens.sizes.bar.innerWidth * Math.max(0.6, Config.bar.scale || 1.0))
+    readonly property int barThickness: Math.round(Tokens.sizes.bar.innerWidth * Math.max(0.6, !isNaN(Config.bar.scale) ? Config.bar.scale : 1.0))
     readonly property var displayDays: weekDays.length > 0 ? weekDays : [
         {
             color: Colours.layer(Colours.palette.m3outlineVariant, 2)

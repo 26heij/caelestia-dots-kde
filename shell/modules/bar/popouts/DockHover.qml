@@ -18,7 +18,7 @@ StyledRect {
         if (!model) return null;
         return Players.list.find(p => p.identity.toLowerCase().includes(model.appClass.toLowerCase()) || (model.id && p.identity.toLowerCase().includes(model.id.toLowerCase().replace(".desktop", "")))) || null;
     }
-    readonly property int previewWidth: Math.round(Tokens.sizes.bar.windowPreviewSize * Math.max(0.5, Config.bar.previewScale || 1.0))
+    readonly property int previewWidth: Math.round(Tokens.sizes.bar.windowPreviewSize * Math.max(0.5, !isNaN(Config.bar.previewScale) ? Config.bar.previewScale : 1.0))
 
     radius: Tokens.rounding.medium
     color: Colours.tPalette.m3surfaceContainer

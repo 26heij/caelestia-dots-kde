@@ -22,7 +22,7 @@ Item {
         if (hr >= 17 && hr < 20) return Qt.resolvedUrl("../../../assets/evening.gif");
         return Qt.resolvedUrl("../../../assets/night.gif");
     }
-    readonly property int previewSize: Math.round(Tokens.sizes.bar.windowPreviewSize * Math.max(0.5, Config.bar.previewScale || 1.0))
+    readonly property int previewSize: Math.round(Tokens.sizes.bar.windowPreviewSize * Math.max(0.5, !isNaN(Config.bar.previewScale) ? Config.bar.previewScale : 1.0))
 
     Column {
         id: child

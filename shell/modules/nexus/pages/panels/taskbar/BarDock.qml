@@ -71,7 +71,7 @@ PageBase {
         StepperRow {
             Layout.fillWidth: true
             label: qsTr("Preview scale")
-            subtext: qsTr("Scale of dock hover preview popouts")
+            subtext: qsTr("Scale of taskbar hover preview popouts")
             value: Config.bar.previewScale
             from: 0.5
             to: 1.6

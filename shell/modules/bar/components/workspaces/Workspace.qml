@@ -19,7 +19,7 @@ GridLayout {
 
     readonly property bool isWorkspace: true // Flag for finding workspace children
     readonly property bool isHorizontal: Config.bar.position === "top" || Config.bar.position === "bottom"
-    readonly property int barThickness: Math.round(Tokens.sizes.bar.innerWidth * Math.max(0.6, Config.bar.scale || 1.0))
+    readonly property int barThickness: Math.round(Tokens.sizes.bar.innerWidth * Math.max(0.6, !isNaN(Config.bar.scale) ? Config.bar.scale : 1.0))
 
     // Unanimated prop for others to use as reference
     readonly property int size: isHorizontal ? (implicitWidth + (hasWindows ? Tokens.padding.extraSmall : 0)) : (implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0))

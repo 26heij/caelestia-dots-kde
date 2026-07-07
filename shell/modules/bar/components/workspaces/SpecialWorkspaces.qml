@@ -347,8 +347,8 @@ Item {
             asynchronous: true
 
             Layout.alignment: isHorizontal ? (Qt.AlignVCenter | Qt.AlignLeft) : (Qt.AlignHCenter | Qt.AlignTop)
-            Layout.preferredWidth: isHorizontal ? Math.round(Tokens.sizes.bar.innerWidth * Math.max(0.6, Config.bar.scale || 1.0)) : -1
-            Layout.preferredHeight: isHorizontal ? -1 : Math.round(Tokens.sizes.bar.innerWidth * Math.max(0.6, Config.bar.scale || 1.0))
+            Layout.preferredWidth: isHorizontal ? Math.round(Tokens.sizes.bar.innerWidth * Math.max(0.6, !isNaN(Config.bar.scale) ? Config.bar.scale : 1.0)) : -1
+            Layout.preferredHeight: isHorizontal ? -1 : Math.round(Tokens.sizes.bar.innerWidth * Math.max(0.6, !isNaN(Config.bar.scale) ? Config.bar.scale : 1.0))
 
             sourceComponent: ws.icon.length === 1 ? letterComp : iconComp
 

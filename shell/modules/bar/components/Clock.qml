@@ -12,7 +12,7 @@ StyledRect {
     readonly property color colour: Colours.palette.m3tertiary
     readonly property int padding: Config.bar.clock.background ? Tokens.padding.medium : Tokens.padding.extraSmall
     readonly property var font: Tokens.font.body.builders.small.scale(1.1)
-    readonly property int barThickness: Math.round(Tokens.sizes.bar.innerWidth * Math.max(0.6, Config.bar.scale || 1.0))
+    readonly property int barThickness: Math.round(Tokens.sizes.bar.innerWidth * Math.max(0.6, !isNaN(Config.bar.scale) ? Config.bar.scale : 1.0))
 
     readonly property bool isHorizontal: Config.bar.position === "top" || Config.bar.position === "bottom"
 
