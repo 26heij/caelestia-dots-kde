@@ -2,7 +2,7 @@
 
 # ✧ C A E L E S T I A <img src="assets/caelestia.svg" width="35" align="top"> ✧
 
-<p align="center"> <b>v2.0.1</b> </p>
+<p align="center"> <b>v2.0.2</b> </p>
 
 ### A KDE adaptation of the celestial aesthetic
 
@@ -106,14 +106,14 @@
   - Updating is simple now with integrated experience.
   - **Gui**: Open Shell settings -> Updates -> Select the update type (stable or bleeding edge) -> Install Updates
   - **Manual**: just run `bash update.sh` and select the branch from which you want to update. 
-  - branches: main (stable) and testing (bleeding edge)
+  - branches: main (stable) and dev (bleeding edge)
   - Shell settings are **not** changed during updates. 
 
 
 </details>
 
 <details>
-  <summary><b> 🌠 v2.0.1 new features</b></summary>
+  <summary><b> 🌠 v2.0.2 new features</b></summary>
   <br/>
 
   - 🌙 **Bar**: MacOS-style app dock, Configurable Panel Position, Material workspace icons, DND toggle, and a live drag-and-drop components editor.

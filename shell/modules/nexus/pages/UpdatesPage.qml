@@ -23,7 +23,7 @@ PageBase {
             icon: "call_split"
         },
         MenuItem {
-            text: "testing"
+            text: "dev"
             icon: "call_split"
         }
     ]

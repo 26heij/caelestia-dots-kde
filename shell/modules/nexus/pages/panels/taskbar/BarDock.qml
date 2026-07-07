@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick.Layouts
 import Caelestia.Config
+import qs.utils
 import qs.modules.nexus.common
 
 PageBase {
@@ -54,19 +55,24 @@ PageBase {
             }
         }
 
-        ToggleRow {
+
+
+        StepperRow {
             Layout.fillWidth: true
-            text: qsTr("Monitor center")
-            subtext: qsTr("Center the dock relative to the physical monitor")
-            checked: Config.bar.dock.monitorCenter
-            onToggled: GlobalConfig.bar.dock.monitorCenter = checked
+            label: qsTr("Icon size")
+            subtext: qsTr("Size of app icons in the dock")
+            value: Config.bar.dock.iconSize
+            from: 20
+            to: Math.max(20, Tokens.sizes.bar.innerWidth)
+            stepSize: 2
+            onMoved: v => GlobalConfig.bar.dock.iconSize = v
         }
 
         ToggleRow {
             Layout.fillWidth: true
             last: true
-            text: qsTr("Recolour icons")
-            subtext: qsTr("Recolour application icons using the system theme")
+            text: Strings.localizeEnglishSpelling(qsTr("Recolour icons"))
+            subtext: Strings.localizeEnglishSpelling(qsTr("Recolour application icons using the system theme"))
             checked: Config.bar.dock.recolourIcons
             onToggled: GlobalConfig.bar.dock.recolourIcons = checked
         }

@@ -15,7 +15,7 @@ Singleton {
     property bool hasUpdate: false
     property string currentBranch: "main"
     property var commits: []
-    property var availableBranches: ["main", "testing"]
+    property var availableBranches: ["main", "dev"]
     property int pendingCount: 0
 
     property string _localCommit: ""
