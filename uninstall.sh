@@ -391,16 +391,25 @@ if [[ -n "$SELECTED_KNSV" ]]; then
 fi
 
 if [[ -z "$SELECTED_KNSV" ]]; then
+    MANUAL_KDE_RESTORE_COUNT=0
     if [[ -n "$SELECTED_BACKUP" ]]; then
         info "Restoring core KDE configuration files from backup..."
         for kde_cfg in kdeglobals ksplashrc plasmarc kwinrc kcminputrc plasma-org.kde.plasma.desktop-appletsrc; do
             if [[ -f "$SELECTED_BACKUP/.config/$kde_cfg" ]]; then
-                cp "$SELECTED_BACKUP/.config/$kde_cfg" "$HOME/.config/$kde_cfg"
+                if cp "$SELECTED_BACKUP/.config/$kde_cfg" "$HOME/.config/$kde_cfg"; then
+                    ((MANUAL_KDE_RESTORE_COUNT++))
+                fi
             fi
         done
-        THEME_RESTORED_FROM_BACKUP="true"
-        ok "Restored core KDE configuration files (including wallpaper and splash)."
-    else
+        if (( MANUAL_KDE_RESTORE_COUNT > 0 )); then
+            THEME_RESTORED_FROM_BACKUP="true"
+            ok "Restored $MANUAL_KDE_RESTORE_COUNT core KDE configuration file(s) from backup (including wallpaper and splash when present)."
+        else
+            warn "Selected backup did not contain expected core KDE config files. Falling back to Breeze defaults."
+        fi
+    fi
+
+    if [[ "$THEME_RESTORED_FROM_BACKUP" != "true" ]]; then
         info "No theme backup found. Reverting to default Breeze theme..."
         kwriteconfig6 --file plasmarc --group "Theme" --key "name" "default"  2>/dev/null || true
         kwriteconfig6 --file kdeglobals --group "KDE"     --key "widgetStyle"  "Breeze" 2>/dev/null || true
