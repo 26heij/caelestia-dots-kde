@@ -60,8 +60,15 @@ for config in btop fastfetch fish foot hypr kitty micro thunar; do
     fi
 done
 
+# Backup existing starship config
+if [[ -f "$HOME/.config/starship.toml" ]]; then
+    mkdir -p "$BACKUP_DIR/.config"
+    cp "$HOME/.config/starship.toml" "$BACKUP_DIR/.config/starship.toml"
+fi
+
 # Deploy starship.toml
 if [[ -f "$DOTS_DIR/starship.toml" ]]; then
+    mkdir -p "$HOME/.config"
     cp "$DOTS_DIR/starship.toml" "$HOME/.config/starship.toml"
     echo "    Deployed: starship.toml"
 fi
