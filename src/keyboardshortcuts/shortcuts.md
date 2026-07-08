@@ -2,16 +2,7 @@
 
 ## Applications
 ```ini
-super + enter
-    kstart -- foot
-super + w
-    kstart -- firefox
-super + c
-    kstart -- code
-super + g
-    kstart -- github-desktop
-super + alt + e
-    kstart -- nemo
+
 ```
 
 # Workspaces
@@ -76,7 +67,7 @@ super + ctrl + s
     caelestia record -s
 super + shift + a
     caelestia shell region search
-super + b
+super + n
     caelestia shell drawers toggle sidebar
 super + shift + c
     ~/.local/bin/kcolorpicker -a
