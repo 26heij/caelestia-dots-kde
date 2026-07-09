@@ -35,10 +35,14 @@ signals:
     void valuesChanged();
 
 private:
+    void recomputeMaximum();
+
     QVector<qreal> m_data;
     int m_head = 0;
     int m_count = 0;
     int m_capacity = 0;
+    qreal m_cachedMaximum = 0.0;
+    bool m_maxDirty = false;
 };
 
 } // namespace caelestia::internal

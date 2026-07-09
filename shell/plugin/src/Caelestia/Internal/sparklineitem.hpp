@@ -4,6 +4,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qquickpainteditem.h>
+#include <qtimer.h>
 
 namespace caelestia::internal {
 
@@ -75,6 +76,7 @@ signals:
 private:
     void drawLine(QPainter* painter, CircularBuffer* buffer, const QColor& color, qreal fillAlpha);
     void connectBuffer(CircularBuffer* buffer);
+    void scheduleUpdate();
 
     CircularBuffer* m_line1 = nullptr;
     CircularBuffer* m_line2 = nullptr;
@@ -86,6 +88,8 @@ private:
     qreal m_slideProgress = 0.0;
     int m_historyLength = 30;
     qreal m_lineWidth = 2.0;
+    bool m_updatePending = false;
+    QTimer m_updateTimer;
 };
 
 } // namespace caelestia::internal

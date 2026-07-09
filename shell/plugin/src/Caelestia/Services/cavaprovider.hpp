@@ -16,7 +16,7 @@ public:
     void setBars(int bars);
 
 signals:
-    void valuesChanged(QVector<double> values);
+    void valuesChanged(const QVector<double>& values);
 
 protected:
     void process() override;
@@ -28,6 +28,7 @@ private:
 
     int m_bars;
     QVector<double> m_values;
+    QVector<double> m_frameValues;
 
     void reload();
     void initCava();
@@ -58,7 +59,7 @@ private:
     int m_bars;
     QVector<double> m_values;
 
-    void updateValues(QVector<double> values);
+    void updateValues(const QVector<double>& values);
 };
 
 } // namespace caelestia::services
