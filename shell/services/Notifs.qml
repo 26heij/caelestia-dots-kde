@@ -18,6 +18,7 @@ Singleton {
     readonly property list<NotifData> notClosed: list.filter(n => !n.closed)
     readonly property list<NotifData> popups: list.filter(n => n.popup)
     property alias dnd: props.dnd
+    property string lastSavedState: ""
 
     property bool loaded
 
@@ -45,6 +46,23 @@ Singleton {
             toClose[i].close();
     }
 
+    function serializeState(): string {
+        return JSON.stringify(root.notClosed.map(n => ({
+                        time: n.time,
+                        id: n.id,
+                        summary: n.summary,
+                        body: n.body,
+                        appIcon: n.appIcon,
+                        appName: n.appName,
+                        image: n.image,
+                        expireTimeout: n.expireTimeout,
+                        urgency: n.urgency,
+                        resident: n.resident,
+                        hasActionIcons: n.hasActionIcons,
+                        actions: n.actions
+                    })));
+    }
+
     onDndChanged: {
         if (!GlobalConfig.utilities.toasts.dndChanged)
             return;
@@ -63,21 +81,14 @@ Singleton {
     Timer {
         id: saveTimer
 
-        interval: 1000
-        onTriggered: storage.setText(JSON.stringify(root.notClosed.map(n => ({
-                    time: n.time,
-                    id: n.id,
-                    summary: n.summary,
-                    body: n.body,
-                    appIcon: n.appIcon,
-                    appName: n.appName,
-                    image: n.image,
-                    expireTimeout: n.expireTimeout,
-                    urgency: n.urgency,
-                    resident: n.resident,
-                    hasActionIcons: n.hasActionIcons,
-                    actions: n.actions
-                }))))
+        interval: 3000
+        onTriggered: {
+            const serialized = root.serializeState();
+            if (serialized === root.lastSavedState)
+                return;
+            root.lastSavedState = serialized;
+            storage.setText(serialized);
+        }
     }
 
     PersistentProperties {
@@ -123,11 +134,13 @@ Singleton {
             for (const notif of data)
                 root.list.push(notifComp.createObject(root, notif));
             root.list.sort((a, b) => b.time - a.time);
+            root.lastSavedState = root.serializeState();
             root.loaded = true;
         }
         onLoadFailed: err => {
             if (err === FileViewError.FileNotFound) {
                 root.loaded = true;
+                root.lastSavedState = "[]";
                 Qt.callLater(() => setText("[]"));
             }
         }
