@@ -16,6 +16,115 @@ ok()   { echo -e "${GREEN}[OK]    $*${RST}"; }
 warn() { echo -e "${RED}[WARN]  $*${RST}"; }
 err()  { echo -e "${RED}[ERR]   $*${RST}"; }
 
+CONFLICT_STATE_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/caelestia-kde/disabled-remappers.txt"
+
+disable_conflicting_remappers() {
+    info "Step 0.5: Checking for conflicting key remapping services..."
+
+    mkdir -p "$(dirname "$CONFLICT_STATE_FILE")"
+    : > "$CONFLICT_STATE_FILE"
+
+    local -a active_system_units=()
+    local -a active_user_units=()
+    local -a known_processes=(kanata kmonad xremap xkeysnail keymapperd keymapper input-remapper-service input-remapper udevmon ktrl)
+
+    mapfile -t active_system_units < <(
+        systemctl list-units --type=service --state=active --no-legend --plain 2>/dev/null |
+            awk '{print $1}' |
+            grep -E '^(kanata|kmonad|input-remapper|input-remapper-service|xremap|xkeysnail|keymapperd|keymapper|udevmon|ktrl)(@|\.service)' || true
+    )
+
+    mapfile -t enabled_system_units < <(
+        systemctl list-unit-files --type=service --no-legend --plain 2>/dev/null |
+            awk '$2=="enabled" {print $1}' |
+            grep -E '^(kanata|kmonad|input-remapper|input-remapper-service|xremap|xkeysnail|keymapperd|keymapper|udevmon|ktrl)(@|\.service)' || true
+    )
+
+    if (( ${#enabled_system_units[@]} > 0 )); then
+        active_system_units+=("${enabled_system_units[@]}")
+    fi
+
+    mapfile -t active_user_units < <(
+        systemctl --user list-units --type=service --state=active --no-legend --plain 2>/dev/null |
+            awk '{print $1}' |
+            grep -E '^(kanata|kmonad|input-remapper|input-remapper-service|xremap|xkeysnail|keymapperd|keymapper|ktrl)(@|\.service)' || true
+    )
+
+    mapfile -t enabled_user_units < <(
+        systemctl --user list-unit-files --type=service --no-legend --plain 2>/dev/null |
+            awk '$2=="enabled" {print $1}' |
+            grep -E '^(kanata|kmonad|input-remapper|input-remapper-service|xremap|xkeysnail|keymapperd|keymapper|ktrl)(@|\.service)' || true
+    )
+
+    if (( ${#enabled_user_units[@]} > 0 )); then
+        active_user_units+=("${enabled_user_units[@]}")
+    fi
+
+    if (( ${#active_system_units[@]} > 0 )); then
+        mapfile -t active_system_units < <(printf '%s\n' "${active_system_units[@]}" | awk '!seen[$0]++')
+    fi
+
+    if (( ${#active_user_units[@]} > 0 )); then
+        mapfile -t active_user_units < <(printf '%s\n' "${active_user_units[@]}" | awk '!seen[$0]++')
+    fi
+
+    if (( ${#active_system_units[@]} == 0 && ${#active_user_units[@]} == 0 )); then
+        ok "No active conflicting remapper services detected."
+    fi
+
+    for unit in "${active_system_units[@]}"; do
+        warn "Disabling conflicting system service: $unit"
+        if sudo systemctl disable --now "$unit" 2>/dev/null; then
+            echo "system:$unit" >> "$CONFLICT_STATE_FILE"
+        else
+            err "Failed to disable conflicting service: $unit"
+        fi
+    done
+
+    for unit in "${active_user_units[@]}"; do
+        warn "Disabling conflicting user service: $unit"
+        if systemctl --user disable --now "$unit" 2>/dev/null; then
+            echo "user:$unit" >> "$CONFLICT_STATE_FILE"
+        else
+            err "Failed to disable conflicting user service: $unit"
+        fi
+    done
+
+    local -a still_running=()
+    for proc in "${known_processes[@]}"; do
+        if pgrep -x "$proc" >/dev/null 2>&1; then
+            still_running+=("$proc")
+        fi
+    done
+
+    if (( ${#still_running[@]} > 0 )); then
+        warn "Attempting to terminate leftover remapper process(es): ${still_running[*]}"
+        for proc in "${still_running[@]}"; do
+            sudo pkill -x "$proc" 2>/dev/null || true
+            pkill -x "$proc" 2>/dev/null || true
+        done
+
+        still_running=()
+        for proc in "${known_processes[@]}"; do
+            if pgrep -x "$proc" >/dev/null 2>&1; then
+                still_running+=("$proc")
+            fi
+        done
+    fi
+
+    if (( ${#still_running[@]} > 0 )); then
+        err "Detected active key remapper process(es) still running: ${still_running[*]}"
+        warn "Disabling keyd as a safety guard to prevent keyboard lockups and sudo auth spam."
+        sudo systemctl disable --now keyd 2>/dev/null || true
+        err "To avoid keyboard lockups/conflicts, stop those remappers and rerun this step."
+        exit 1
+    fi
+
+    if [[ -s "$CONFLICT_STATE_FILE" ]]; then
+        ok "Conflicting remapper services were disabled (recorded at $CONFLICT_STATE_FILE)."
+    fi
+}
+
 CONFIG_FILE="$HOME/.config/kglobalshortcutsrc"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUNDLE_DIR="${BUNDLE_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
@@ -54,6 +163,13 @@ if ! command -v keyd &> /dev/null; then
 else
     ok "keyd is already installed."
 fi
+
+if systemctl is-active --quiet keyd 2>/dev/null; then
+    info "Stopping keyd temporarily while checking other remappers..."
+    sudo systemctl stop keyd 2>/dev/null || warn "Could not stop keyd before conflict checks (continuing)."
+fi
+
+disable_conflicting_remappers
 
 # Clean up legacy swhkd if present
 if systemctl is-active --quiet swhkd@$USER.service 2>/dev/null; then
@@ -162,6 +278,8 @@ fi
 
 cat << 'EOF' > /tmp/convert_to_keyd.py
 import sys, os
+import shlex
+import shutil
 
 def parse_key(k):
     k = k.strip().lower()
@@ -184,6 +302,7 @@ uid = os.environ.get('UID', '1000')
 user = os.environ.get('USER', __import__('getpass').getuser())
 wayland_display = os.environ.get('WAYLAND_DISPLAY', 'wayland-0')
 display = os.environ.get('DISPLAY', ':0')
+runuser_cmd = shutil.which('runuser') or '/usr/bin/runuser'
 
 lines = open(sys.argv[1]).read().strip().split('\n')
 sections = {'main': []}
@@ -214,8 +333,19 @@ while i < len(parsed_lines):
         sections[section] = []
         
     cmd = cmd.replace("~", f"/home/{user}")
-    wrapped = f"sudo -iu {user} WAYLAND_DISPLAY={wayland_display} DISPLAY={display} XDG_RUNTIME_DIR=/run/user/{uid} DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{uid}/bus {cmd}"
+    wrapped = (
+        f"{runuser_cmd} -u {user} -- env "
+        f"WAYLAND_DISPLAY={wayland_display} "
+        f"DISPLAY={display} "
+        f"XDG_RUNTIME_DIR=/run/user/{uid} "
+        f"DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{uid}/bus "
+        f"sh -lc {shlex.quote(cmd)}"
+    )
     sections[section].append(f"{k} = command({wrapped})")
+
+# Keep right shift as right shift for MangoHud and other keycode-sensitive apps.
+if "rightshift = rightshift" not in sections["main"]:
+    sections["main"].insert(0, "rightshift = rightshift")
 
 out = ["[ids]", "*", ""]
 for sec, items in sections.items():
