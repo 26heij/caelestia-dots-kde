@@ -85,13 +85,21 @@ print_line
 echo
 echo -e "${YELLOW}Next steps:${RST}"
 echo -e "  1) Log out now, then log back in."
-echo -e "  2) If a kernel update occurred, reboot immediately."
+echo -e "  2) If a kernel update occurred, reboot immediately. If no update occured, we still recommend a reboot to ensure all changes take effect."
 echo -e "  3) Remove all KDE panels after login (Super+D -> panel config)."
 echo -e "  4) To enter desktop edit mode later: Super+D -> right click desktop."
 echo
-echo -e "${CYAN}You can re-run this installer at any time. It is idempotent.${RST}"
-echo -e "${CYAN}Troubleshooting is available in the project documentation.${RST}"
-echo
+
+# Print total elapsed installation time (provided by setup.sh).
+if [[ -n "${INSTALL_START_EPOCH:-}" ]]; then
+    INSTALL_END_EPOCH="$(date +%s)"
+    INSTALL_ELAPSED_SEC="$((INSTALL_END_EPOCH - INSTALL_START_EPOCH))"
+    INSTALL_HOURS="$((INSTALL_ELAPSED_SEC / 3600))"
+    INSTALL_MINUTES="$(((INSTALL_ELAPSED_SEC % 3600) / 60))"
+    INSTALL_SECONDS="$((INSTALL_ELAPSED_SEC % 60))"
+    echo -e "${GREEN}[OK] Total installation time: ${INSTALL_HOURS}h ${INSTALL_MINUTES}m ${INSTALL_SECONDS}s${RST}"
+    echo
+fi
 
 # Cleanup cmake build cache as it contains absolute paths
 rm -rf "$(dirname "$0")/../shell/build" "$(dirname "$0")/../shell/plugin/build"

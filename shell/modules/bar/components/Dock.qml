@@ -67,7 +67,7 @@ Item {
         root.modelDataArray = newArr;
     }
 
-    readonly property real configuredItemSize: Math.max(16, Math.min(Tokens.sizes.bar.innerWidth, Config.bar.dock.iconSize || 32))
+    readonly property real configuredItemSize: Math.max(16, Math.min(bar.thickness, Config.bar.dock.iconSize || 32))
     StyledRect {
         id: container
 
@@ -77,8 +77,8 @@ Item {
         property int __itemCount: dockModel.count
         property real __computedContentWidth: __itemCount > 0 ? __itemCount * itemSize + (__itemCount - 1) * root.spacing : 0
 
-        implicitWidth: bar.isHorizontal ? (__computedContentWidth + padding * 2) : Tokens.sizes.bar.innerWidth
-        implicitHeight: bar.isHorizontal ? Tokens.sizes.bar.innerWidth : (__computedContentWidth + padding * 2)
+        implicitWidth: bar.isHorizontal ? (__computedContentWidth + padding * 2) : bar.thickness
+        implicitHeight: bar.isHorizontal ? bar.thickness : (__computedContentWidth + padding * 2)
         
         width: bar.isHorizontal ? Math.min(implicitWidth, maxHorizontalSize) : implicitWidth
         height: !bar.isHorizontal ? Math.min(implicitHeight, maxVerticalSize) : implicitHeight
@@ -365,6 +365,7 @@ Item {
 
                     property bool isActive: {
                         const dummy = root.modelUpdateTrigger;
+                        if (!modelData) return false;
                         for (const top of modelData.toplevels) {
                             if (top.focused) return true;
                         }
@@ -373,6 +374,7 @@ Item {
 
                     property bool hasWindows: {
                         const dummy = root.modelUpdateTrigger;
+                        if (!modelData) return false;
                         return modelData.toplevels.length > 0;
                     }
 
@@ -384,6 +386,7 @@ Item {
                         anchors.centerIn: parent
                         implicitSize: Math.round(((delegateItem.width || 0) * 0.7) / 2) * 2 || 0
                         source: {
+                            if (!modelData) return "";
                             if (modelData.entry && modelData.entry.icon) {
                                 return Quickshell.iconPath(modelData.entry.icon, "image-missing");
                             }
@@ -410,7 +413,7 @@ Item {
 
                     Loader {
                         anchors.fill: icon
-                        active: root.launchingApps[modelData.appClass || modelData.id] || false
+                        active: modelData ? (root.launchingApps[modelData.appClass || modelData.id] || false) : false
                         sourceComponent: CircularIndicator {
                             running: true
                             strokeWidth: 2
@@ -441,6 +444,7 @@ Item {
                         
                         model: {
                             const dummy = root.modelUpdateTrigger;
+                            if (!modelData) return 0;
                             return Math.min(2, modelData.toplevels.length);
                         }
                         

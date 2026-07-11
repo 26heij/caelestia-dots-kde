@@ -1,8 +1,8 @@
 <div align="center">
 
-# ✧ C A E L E S T I A <img src="assets/caelestia.svg" width="35" align="top"> ✧
+# C A E L E S T I A <img src="assets/caelestia.svg" width="35" align="top">
 
-<p align="center"> <b>v2.0.2</b> </p>
+<p align="center"> <b>v2.1.0</b> </p>
 
 ### A KDE adaptation of the celestial aesthetic
 
@@ -32,7 +32,7 @@
 > This is a **community KDE port** of the beautiful [Caelestia Hyprland dotfiles](https://github.com/caelestia-dots/caelestia), meticulously adapted by **[ladybug-me](https://github.com/ladybug-me)** to bring the heavens to **KDE Plasma**.
 
 <details> 
-  <summary><b>✨ What this is / isn't</b></summary>
+  <summary><b>What this is / isn't</b></summary>
   <br/>
 
   - **Technically:** A curated collection of KDE Plasma configuration files, custom widgets, and idempotent installation scripts.
@@ -43,7 +43,7 @@
 </details>
 
 <details> 
-  <summary><b>🌌 Why KDE instead of Hyprland?</b></summary>
+  <summary><b>Why KDE instead of Hyprland?</b></summary>
   <br/>
 
   - KDE Plasma offers broader compatibility with existing tools, hardware, and ecosystems.
@@ -54,24 +54,22 @@
 </details>
 
 <details> 
-  <summary><b>🚀 Key Features</b></summary>
+  <summary><b>Key Features</b></summary>
   <br/>
 
-  - **Material Design 3 Theming:** Cohesive dark theme driven by Darkly + Kvantum + dynamic color extraction.
-  - **Quickshell Widgets:** Native, robust KDE integration with a modern Qt-based widget system.
-    
-  - **Kde Plasma 6.7:** Built to work with the latest release.
-  - **Custom KDE Bridge:** Quickshell-KDE integration via a custom KWin script for fluid widget interaction.
-  - **Custom Hyprctl:** Rewritten to integrate Hyprland-like calls seamlessly via Quickshell.
-  - **Transparent Installation:** Every command is printed before execution. Safe and idempotent.
-  - **Easy Uninstallation:** Cleanly remove the setup with a dedicated uninstallation script (thanks to [0xSolanaceae](https://github.com/0xSolanaceae)).
-  - **QoL Features:** Dino Game with Kuru Kuru Runner 🦖 , Google lens 📸 , Screenshot tool 📷 , Screen recording with sound 📹 , Color picker 🎨 , Emoji picker 😂 , Clipboard history , Shortcuts Cheatsheet 📝.
-  - **Window Tiling:** Optional *Polonium* support for dynamic tiling window management on Plasma.
+  - **Works on Real KDE Setups:** Built and tested on current Plasma versions across Arch-based distros and Fedora.
+  - **Fast to Install, Safe to Re-run:** Idempotent scripts let you retry installation without wrecking your existing setup.
+  - **Clean Rollback:** Dedicated uninstaller makes it easy to revert if you do not like the result.
+  - **Consistent Theming:** Darkly + Kvantum + dynamic color extraction keep apps and shell visuals in sync.
+  - **Deep KDE Integration:** Custom KWin bridge and Quickshell modules provide tight desktop-level behavior.
+  - **Daily-Use Tools Included:** Screenshot, screen recording with audio, color picker, clipboard history, and emoji picker are ready out of the box.
+  - **Simple Update Path:** Update from UI or command line without overwriting your shell settings.
+  - **Optional Tiling Workflow:** Polonium support is available if you want dynamic tiling on Plasma.
   
 </details>
 
 <details> 
-  <summary><b>📥 Installation</b></summary>
+  <summary><b>Installation</b></summary>
   <br/>
 
   1. **Clone this repository:**
@@ -99,7 +97,7 @@
 </details>
 
 <details> 
-  <summary><b>💫 Updates</b></summary>
+  <summary><b>Updates</b></summary>
   <br/>
     
     NOTE: You must backup your ~/.config if you have made changes to the dot or shell files
@@ -112,25 +110,14 @@
 
 </details>
 
-<details>
-  <summary><b> 🌠 v2.0.2 new features</b></summary>
-  <br/>
-
-  - 🌙 **Bar**: MacOS-style app dock, Configurable Panel Position, Material workspace icons, DND toggle, and a live drag-and-drop components editor.
-  - ☄️ **Launchers**: Emoji Picker, Clipboard History, Window Switcher, and Hyprland Keybinds.
-  - 🌌 **Wallpapers**: GIF/video support with auto-pause, plus Wallhaven integration.
-  - 🎵 **Bad Apple Easter Egg**: A custom shader effect that plays Bad Apple directly through the shell's UI material by masking the background and preserving the shell's native translucent blur and shadow effects.
-  - 🔭 **Dashboard**: Developer console terminal tab with history and autocomplete.
-  - 🪐 **Desktop**: Floating lyrics, Sound visualizer, Shimeji pets, dynamic wallpaper recoloring, and Bezel Mode.
-  - 🧠 **Ai**: Added Ai assistant in notification panel with ollama support.
-  - ⏩️ **Performance**: Added custom C++ backend plugins for a faster shell experience.
-  - 🔄 **Updates**: Automatic updates through shell settings.
-
-</details>
-
 <div align="center">
     <h2>✦ Visuals ✦</h2>
 </div>
+
+
+
+https://github.com/user-attachments/assets/9ad2e5f5-f80e-48c0-b65b-a4084bb363c6
+
 
 | Caelestia on KDE Plasma Shell | Theming in Action |
 |:---:|:---:|
@@ -154,7 +141,7 @@
 
 
 <details> 
-  <summary><b>📦 Expand to view the comprehensive package lists</b></summary>
+  <summary><b>Expand to view the comprehensive package lists</b></summary>
   <br/>
 
   The setup scripts install a curated suite of packages organized by category.
@@ -241,7 +228,7 @@ Then rebuild the shell by running setup.sh again.
 </div>
 
 <details>
-  <summary><b>❌️ Critical Error Handling</b></summary>
+  <summary><b>Critical Error Handling</b></summary>
   <br/>
 
   If something got **really messed up** (setup broken, build error, great panic..)
@@ -250,7 +237,7 @@ Then rebuild the shell by running setup.sh again.
   1. **Get Access to a terminal**: Win+Enter or Alt+Ctl+T or The last hope tty: Ctl + Alt + F3 or any other Fn key that works.
   2. **Uninstall.sh**: Open terminal where setup.sh is, run `bash uninstall.sh`. **NOTE**: Enter `0` when it asks for which backup to restore.
   3. **Delete all shell files**: Run `rm -rf ~/.config/caelestia ~/.config/quickshell`. Also delete the cloned repo folder.
-  4. **Reboot**: Run `reboot` (May be a laggy one, if stuck, do a power on off). You will be seeing a wallpaper only after restarting with light theme 👀. Its the normal KDE shell without any panels. You can add any panels if you want by `Right Click -> Edit Mode`.
+  4. **Reboot**: Run `reboot` (May be a laggy one, if stuck, do a power on off). You will be seeing a wallpaper only after restarting with light theme. Its the normal KDE shell without any panels. You can add any panels if you want by `Right Click -> Edit Mode`.
   5. **Clone the latest main repo**: Run
      ```bash
      git clone -b main --single-branch --depth 1 https://github.com/ladybug-me/caelestia-dots-kde ~/caelestia
@@ -261,7 +248,7 @@ Then rebuild the shell by running setup.sh again.
     
 </details>
 <details>
-  <summary><b>🐞 Viewing Debug Logs & Supported Components</b></summary>
+  <summary><b>Viewing Debug Logs & Supported Components</b></summary>
   <br/>
 
   Caelestia includes a built-in Debug Mode that enables verbose console logging for various internal components.
@@ -289,7 +276,7 @@ Then rebuild the shell by running setup.sh again.
 </details>
 
 <details>
-  <summary><b>🛠️ Caelestia widgets not appearing</b></summary>
+  <summary><b>Caelestia widgets not appearing</b></summary>
   <br/>
   
   - Log out and log back in.
@@ -298,7 +285,7 @@ Then rebuild the shell by running setup.sh again.
 </details>
 
 <details>
-  <summary><b>🎨 Colors not applying correctly</b></summary>
+  <summary><b>Colors not applying correctly</b></summary>
   <br/>
     
   - Run `systemctl status --user kde-material-you-colors.service` to check for errors.
@@ -309,7 +296,7 @@ Then rebuild the shell by running setup.sh again.
 </details>
 
 <details>
-  <summary><b>⚠️ Installation failed at step X</b></summary>
+  <summary><b>Installation failed at step X</b></summary>
   <br/>
 
   - Sudo timeout: If a system update takes a long time, sudo might time out. 
@@ -319,10 +306,10 @@ Then rebuild the shell by running setup.sh again.
 </details>
 
 <details>
-  <summary><b>⏪ Uninstallation & Reverting Changes</b></summary>
+  <summary><b>Uninstallation & Reverting Changes</b></summary>
   <br/>
 
-  The easiest way to revert changes and uninstall the Caelestia KDE theme is to use the dedicated uninstallation script (kindly contributed by **[0xSolanaceae](https://github.com/0xSolanaceae)**):
+  The easiest way to revert changes and uninstall the Caelestia KDE theme is to use the dedicated uninstallation script:
   ```bash
   bash ./uninstall.sh
   ```
@@ -333,7 +320,7 @@ Then rebuild the shell by running setup.sh again.
 </details>
 
 <details>
-  <summary><b>⌨️ Shell shortcuts not working</b></summary>
+  <summary><b>Shell shortcuts not working</b></summary>
   <br/>
   
   The most probable cause is a `keyd` service failure.
@@ -341,18 +328,29 @@ Then rebuild the shell by running setup.sh again.
   
   Another cause is you ran setup.sh or register.sh with sudo.
   See [Issue#5](https://github.com/ladybug-me/caelestia-dots-kde/issues/5) for this.
+
+  Another common cause is a conflict with other key remappers (for example: Kanata, KMonad, input-remapper, xremap).
+  During keyboard shortcut setup, the installer now disables known conflicting remapper services before enabling keyd.
+  If a conflicting remapper process is still running, keyd is disabled as a safety guard and the step exits with an actionable error.
+
+  MangoHud hotkeys can also be affected by keyd keycode behavior on some systems.
+  The generated keyd config includes the workaround below by default:
+  ```ini
+  [main]
+  rightshift = rightshift
+  ```
   
   *Special case:* If a kernel update happened, you might see "no uinput device" when running `sudo keyd`. Rebooting will fix this.
 
 </details>
 
 <details>
-  <summary><b>😟 Note for Fedora users: </b></summary>
+  <summary><b>Note for Fedora users: </b></summary>
   <br/>
   
   - I have done everything, everypatch, every script possible to make it work on fedora but maybe for someone it might require manual intervention. Follow the installer's carefully placed logs to find any issue and fix it manually.
 
-  - Know that it **works on Fedora** 😄.
+  - Know that it **works on Fedora**.
 
 </details>
 
@@ -364,7 +362,7 @@ Then rebuild the shell by running setup.sh again.
 
 - **[Caelestia](https://github.com/caelestia)** for the incredible, otherworldly design language and the original dotfiles.
 - **[ladybug-me](https://github.com/ladybug-me)** for meticulously adapting the dotfiles to KDE Plasma.
-- **[0xSolanaceae](https://github.com/0xSolanaceae)** for contributing the uninstallation feature.
+- **[0xSolanaceae](https://github.com/0xSolanaceae)** for showing direction the project needed.
 - **[Content-Swordfish751](https://www.reddit.com/user/Content-Swordfish751/)** for many important contributions.
 - **[Peace-W](https://github.com/Peace-W)** for Nobara fix.
 - **[dim-ghub](https://github.com/dim-ghub/caelestia-shell)** for the added features in v2.0.0 from his fork.
@@ -373,6 +371,13 @@ Then rebuild the shell by running setup.sh again.
 - **[KDE Plasma](https://kde.org/plasma/)** — The powerhouse desktop environment.
 
 ---
+
+<div align="center">
+    <h2>✦ Maintainers ✦</h2>
+</div>
+
+- **[ladybug-me](https://github.com/ladybug-me)** — Project owner and KDE port lead; oversees the project while actively maintaining it, resolving issues, and developing new features.
+- **[0xSolanaceae](https://github.com/0xSolanaceae)** — Co-maintainer; actively maintains the project, works on issues, improves tooling and QA, and develops new features.
 
 <div align="center">
     <h2>✦ Support & License ✦</h2>

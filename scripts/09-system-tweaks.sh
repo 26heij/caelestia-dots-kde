@@ -18,6 +18,17 @@ info() { echo -e "${CYAN}[INFO]  $*${RST}"; }
 ok()   { echo -e "${GREEN}[OK]    $*${RST}"; }
 warn() { echo -e "${RED}[WARN]  $*${RST}"; }
 
+# Never open an interactive sudo prompt from this script.
+# If setup.sh exported SUDO_PASS we reuse it; otherwise we fail fast.
+run_sudo_non_interactive() {
+    if [[ -n "${SUDO_PASS:-}" ]]; then
+        # Feed password via stdin; avoid forcing -n (it would fail immediately if auth is required).
+        printf '%s\n' "$SUDO_PASS" | sudo -S -p '' "$@"
+    else
+        sudo -n "$@"
+    fi
+}
+
 echo
 echo ""
 echo "  caelestia KDE  Live System Tweaks"
@@ -128,7 +139,7 @@ tweak_default_shell() {
         local fish_path
         fish_path="$(command -v fish)"
         
-        printf '%s\n' "${SUDO_PASS:-}" | sudo -S chsh -s "$fish_path" "$USER" 2>/dev/null || warn "Failed to change shell for $USER. You may need to run 'chsh -s $fish_path' manually."
+        run_sudo_non_interactive chsh -s "$fish_path" "$USER" 2>/dev/null || warn "Failed to change shell for $USER without prompting. You may need to run 'sudo chsh -s $fish_path $USER' manually."
         
         local konsole_profile_dir="$HOME/.local/share/konsole"
         mkdir -p "$konsole_profile_dir"
@@ -188,7 +199,7 @@ if old in text:
     p.write_text(text.replace(old, new))
 "
         if ! python3 -c "$python_code" 2>/dev/null; then
-            if ! printf '%s\n' "${SUDO_PASS:-}" | sudo -S python3 -c "$python_code" 2>/dev/null; then
+            if ! run_sudo_non_interactive python3 -c "$python_code" 2>/dev/null; then
                 warn "Failed to patch $theme_file (requires sudo)"
                 echo "Caelestia CLI Theme Sequence Patch" >> "${XDG_CACHE_HOME:-$HOME/.cache}/caelestia-kde/failed_patches.txt"
             fi

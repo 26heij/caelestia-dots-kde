@@ -3,10 +3,13 @@ pragma ComponentBehavior: Bound
 import "popouts" as BarPopouts
 import "components"
 import "components/workspaces"
+import "components/performance"
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Services.UPower
 import Caelestia.Config
+import Caelestia.Services
 import qs.components
 import qs.services
 
@@ -19,6 +22,8 @@ Item {
     required property BarPopouts.Wrapper popouts
     required property bool fullscreen
     readonly property int vPadding: Tokens.padding.large
+    readonly property real barScale: Math.max(0.6, !isNaN(Config.bar.scale) ? Config.bar.scale : 1.0)
+    readonly property int thickness: Math.round(Tokens.sizes.bar.innerWidth * barScale)
 
     readonly property bool isHorizontal: Config.bar.position === "top" || Config.bar.position === "bottom"
     readonly property real leftZoneSize: isHorizontal ? leftLayout.implicitWidth : leftLayout.implicitHeight
@@ -352,6 +357,48 @@ Item {
                 delegate: WrappedLoader {
                     visible: !root.fullscreen
                     sourceComponent: StatusIcons {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "perfCpu"
+                delegate: WrappedLoader {
+                    visible: !root.fullscreen && Cpu.name.length > 0
+                    sourceComponent: PerfCpu {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "perfMemory"
+                delegate: WrappedLoader {
+                    visible: !root.fullscreen && Memory.total > 1
+                    sourceComponent: PerfMemory {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "perfStorage"
+                delegate: WrappedLoader {
+                    visible: !root.fullscreen && Storage.disks.length > 0
+                    sourceComponent: PerfStorage {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "perfNetwork"
+                delegate: WrappedLoader {
+                    visible: !root.fullscreen
+                    sourceComponent: PerfNetwork {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "perfGpu"
+                delegate: WrappedLoader {
+                    visible: !root.fullscreen && Gpu.type !== Gpu.None
+                    sourceComponent: PerfGpu {}
+                }
+            }
+            DelegateChoice {
+                roleValue: "perfBattery"
+                delegate: WrappedLoader {
+                    visible: !root.fullscreen && UPower.displayDevice.isLaptopBattery
+                    sourceComponent: PerfBattery {}
                 }
             }
             DelegateChoice {

@@ -154,10 +154,62 @@ public:
         : ConfigObject(parent) {}
 };
 
+class BarPreviewScales : public ConfigObject {
+    Q_OBJECT
+    QML_ANONYMOUS
+
+    CONFIG_PROPERTY(qreal, activeWindow, 0.0)
+    CONFIG_PROPERTY(qreal, audio, 0.0)
+    CONFIG_PROPERTY(qreal, battery, 0.0)
+    CONFIG_PROPERTY(qreal, bluetooth, 0.0)
+    CONFIG_PROPERTY(qreal, dock, 0.0)
+    CONFIG_PROPERTY(qreal, github, 0.0)
+    CONFIG_PROPERTY(qreal, lockStatus, 0.0)
+    CONFIG_PROPERTY(qreal, network, 0.0)
+    CONFIG_PROPERTY(qreal, notifications, 0.0)
+    CONFIG_PROPERTY(qreal, peripheralBattery, 0.0)
+    CONFIG_PROPERTY(qreal, trayMenu, 0.0)
+    CONFIG_PROPERTY(qreal, wirelessPassword, 0.0)
+
+public:
+    explicit BarPreviewScales(QObject* parent = nullptr)
+        : ConfigObject(parent) {}
+};
+
+class BarPreviewFontScales : public ConfigObject {
+    Q_OBJECT
+    QML_ANONYMOUS
+
+    CONFIG_PROPERTY(qreal, activeWindow, 0.0)
+    CONFIG_PROPERTY(qreal, audio, 0.0)
+    CONFIG_PROPERTY(qreal, battery, 0.0)
+    CONFIG_PROPERTY(qreal, bluetooth, 0.0)
+    CONFIG_PROPERTY(qreal, dock, 0.0)
+    CONFIG_PROPERTY(qreal, github, 0.0)
+    CONFIG_PROPERTY(qreal, lockStatus, 0.0)
+    CONFIG_PROPERTY(qreal, network, 0.0)
+    CONFIG_PROPERTY(qreal, notifications, 0.0)
+    CONFIG_PROPERTY(qreal, peripheralBattery, 0.0)
+    CONFIG_PROPERTY(qreal, trayMenu, 0.0)
+    CONFIG_PROPERTY(qreal, wirelessPassword, 0.0)
+
+public:
+    explicit BarPreviewFontScales(QObject* parent = nullptr)
+        : ConfigObject(parent) {}
+};
+
 class BarConfig : public ConfigObject {
     Q_OBJECT
     QML_ANONYMOUS
 
+    CONFIG_PROPERTY(qreal, scale, 1.0)
+    CONFIG_PROPERTY(qreal, previewScale, 1.0)
+    CONFIG_PROPERTY(bool, previewScaleWithBar, false)
+    CONFIG_PROPERTY(bool, perElementPreviewScale, false)
+    CONFIG_PROPERTY(bool, perElementFontScale, false)
+    CONFIG_PROPERTY(qreal, fontScaleOffset, 0.0)
+    CONFIG_SUBOBJECT(BarPreviewScales, previewScales)
+    CONFIG_SUBOBJECT(BarPreviewFontScales, previewFontScales)
     CONFIG_PROPERTY(bool, persistent, true)
     CONFIG_PROPERTY(bool, showOnHover, true)
     CONFIG_PROPERTY(int, dragThreshold, 20)
@@ -181,6 +233,12 @@ class BarConfig : public ConfigObject {
             vmap({ { u"id"_s, u"github"_s }, { u"enabled"_s, true }, { u"zone"_s, u"right"_s } }),
             vmap({ { u"id"_s, u"clock"_s }, { u"enabled"_s, true }, { u"zone"_s, u"right"_s } }),
             vmap({ { u"id"_s, u"statusIcons"_s }, { u"enabled"_s, true }, { u"zone"_s, u"right"_s } }),
+            vmap({ { u"id"_s, u"perfCpu"_s }, { u"enabled"_s, false }, { u"zone"_s, u"right"_s } }),
+            vmap({ { u"id"_s, u"perfMemory"_s }, { u"enabled"_s, false }, { u"zone"_s, u"right"_s } }),
+            vmap({ { u"id"_s, u"perfStorage"_s }, { u"enabled"_s, false }, { u"zone"_s, u"right"_s } }),
+            vmap({ { u"id"_s, u"perfNetwork"_s }, { u"enabled"_s, false }, { u"zone"_s, u"right"_s } }),
+            vmap({ { u"id"_s, u"perfGpu"_s }, { u"enabled"_s, false }, { u"zone"_s, u"right"_s } }),
+            vmap({ { u"id"_s, u"perfBattery"_s }, { u"enabled"_s, false }, { u"zone"_s, u"right"_s } }),
             vmap({ { u"id"_s, u"power"_s }, { u"enabled"_s, true }, { u"zone"_s, u"right"_s } }),
         })
     CONFIG_PROPERTY(QStringList, excludedScreens)
@@ -188,6 +246,8 @@ class BarConfig : public ConfigObject {
 public:
     explicit BarConfig(QObject* parent = nullptr)
         : ConfigObject(parent)
+        , m_previewScales(new BarPreviewScales(this))
+        , m_previewFontScales(new BarPreviewFontScales(this))
         , m_scrollActions(new BarScrollActions(this))
         , m_popouts(new BarPopouts(this))
         , m_workspaces(new BarWorkspaces(this))

@@ -23,6 +23,7 @@ StyledRect {
     readonly property int padding: Config.bar.github.background ? Tokens.padding.medium : Tokens.padding.small
     readonly property int cellSize: 12
     readonly property int cellSpacing: Tokens.spacing.small
+    readonly property int barThickness: Math.round(Tokens.sizes.bar.innerWidth * Math.max(0.6, !isNaN(Config.bar.scale) ? Config.bar.scale : 1.0))
     readonly property var displayDays: weekDays.length > 0 ? weekDays : [
         {
             color: Colours.layer(Colours.palette.m3outlineVariant, 2)
@@ -61,8 +62,8 @@ StyledRect {
 
     readonly property bool isHorizontal: Config.bar.position === "top" || Config.bar.position === "bottom"
 
-    implicitWidth: isHorizontal ? (cells.implicitWidth + root.padding * 2) : Tokens.sizes.bar.innerWidth
-    implicitHeight: isHorizontal ? Tokens.sizes.bar.innerWidth : (cells.implicitHeight + root.padding * 2)
+    implicitWidth: isHorizontal ? (cells.implicitWidth + root.padding * 2) : barThickness
+    implicitHeight: isHorizontal ? barThickness : (cells.implicitHeight + root.padding * 2)
 
     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.github.background ? Colours.tPalette.m3surfaceContainer.a : 0)
     radius: Tokens.rounding.full
@@ -119,7 +120,7 @@ StyledRect {
         command: ["bash", "-c", `
         set -Eeuo pipefail
         export GITHUB_TOKEN="$(secret-tool lookup service caelestia-shell account github 2>/dev/null || echo '')"
-        : "\${GITHUB_TOKEN:?Missing GITHUB_TOKEN}"
+        : "\${GITHUB_TOKEN:?No token set — go to Settings → Panels → Taskbar → GitHub to add one}"
 
         # Resolve login via token if GITHUB_USERNAME is unset
         login="\${GITHUB_USERNAME-}"
@@ -269,6 +270,23 @@ PY
         running: true
         repeat: true
         triggeredOnStart: true
-        onTriggered: proc.exec(proc.command)
+        onTriggered: {
+            // Don't re-poll if the token is known to be absent — it won't change until
+            // the user saves one via Settings → Panels → Taskbar → GitHub, which fires
+            // GithubStore.refresh() and restarts the process directly.
+            if ((root.lastError.includes("No token set") || root.lastError.includes("Missing GITHUB_TOKEN")) && !BarComponents.GithubStore.available)
+                return;
+            proc.exec(proc.command);
+        }
+    }
+
+    Connections {
+        target: BarComponents.GithubStore
+        function onRefresh(): void {
+            root.lastError = "";
+            BarComponents.GithubStore.lastError = "";
+            BarComponents.GithubStore.available = false;
+            proc.exec(proc.command);
+        }
     }
 }

@@ -10,6 +10,12 @@ namespace caelestia::internal {
 SparklineItem::SparklineItem(QQuickItem* parent)
     : QQuickPaintedItem(parent) {
     setAntialiasing(true);
+    m_updateTimer.setSingleShot(true);
+    m_updateTimer.setInterval(16);
+    QObject::connect(&m_updateTimer, &QTimer::timeout, this, [this]() {
+        m_updatePending = false;
+        update();
+    });
 }
 
 void SparklineItem::paint(QPainter* painter) {
@@ -72,7 +78,7 @@ void SparklineItem::connectBuffer(CircularBuffer* buffer) {
         return;
 
     connect(buffer, &CircularBuffer::valuesChanged, this, [this]() {
-        update();
+        scheduleUpdate();
     });
     connect(buffer, &QObject::destroyed, this, [this, buffer]() {
         if (m_line1 == buffer) {
@@ -83,8 +89,16 @@ void SparklineItem::connectBuffer(CircularBuffer* buffer) {
             m_line2 = nullptr;
             emit line2Changed();
         }
-        update();
+        scheduleUpdate();
     });
+}
+
+void SparklineItem::scheduleUpdate() {
+    if (m_updatePending)
+        return;
+
+    m_updatePending = true;
+    m_updateTimer.start();
 }
 
 CircularBuffer* SparklineItem::line1() const {
@@ -99,7 +113,7 @@ void SparklineItem::setLine1(CircularBuffer* buffer) {
     m_line1 = buffer;
     connectBuffer(buffer);
     emit line1Changed();
-    update();
+    scheduleUpdate();
 }
 
 CircularBuffer* SparklineItem::line2() const {
@@ -114,7 +128,7 @@ void SparklineItem::setLine2(CircularBuffer* buffer) {
     m_line2 = buffer;
     connectBuffer(buffer);
     emit line2Changed();
-    update();
+    scheduleUpdate();
 }
 
 QColor SparklineItem::line1Color() const {
@@ -126,7 +140,7 @@ void SparklineItem::setLine1Color(const QColor& color) {
         return;
     m_line1Color = color;
     emit line1ColorChanged();
-    update();
+    scheduleUpdate();
 }
 
 QColor SparklineItem::line2Color() const {
@@ -138,7 +152,7 @@ void SparklineItem::setLine2Color(const QColor& color) {
         return;
     m_line2Color = color;
     emit line2ColorChanged();
-    update();
+    scheduleUpdate();
 }
 
 qreal SparklineItem::line1FillAlpha() const {
@@ -150,7 +164,7 @@ void SparklineItem::setLine1FillAlpha(qreal alpha) {
         return;
     m_line1FillAlpha = alpha;
     emit line1FillAlphaChanged();
-    update();
+    scheduleUpdate();
 }
 
 qreal SparklineItem::line2FillAlpha() const {
@@ -162,7 +176,7 @@ void SparklineItem::setLine2FillAlpha(qreal alpha) {
         return;
     m_line2FillAlpha = alpha;
     emit line2FillAlphaChanged();
-    update();
+    scheduleUpdate();
 }
 
 qreal SparklineItem::maxValue() const {
@@ -174,7 +188,7 @@ void SparklineItem::setMaxValue(qreal value) {
         return;
     m_maxValue = value;
     emit maxValueChanged();
-    update();
+    scheduleUpdate();
 }
 
 qreal SparklineItem::slideProgress() const {
@@ -186,7 +200,7 @@ void SparklineItem::setSlideProgress(qreal progress) {
         return;
     m_slideProgress = progress;
     emit slideProgressChanged();
-    update();
+    scheduleUpdate();
 }
 
 int SparklineItem::historyLength() const {
@@ -198,7 +212,7 @@ void SparklineItem::setHistoryLength(int length) {
         return;
     m_historyLength = length;
     emit historyLengthChanged();
-    update();
+    scheduleUpdate();
 }
 
 qreal SparklineItem::lineWidth() const {
@@ -210,7 +224,7 @@ void SparklineItem::setLineWidth(qreal width) {
         return;
     m_lineWidth = width;
     emit lineWidthChanged();
-    update();
+    scheduleUpdate();
 }
 
 } // namespace caelestia::internal
