@@ -24,6 +24,12 @@ PageBase {
         "tray": { icon: "expand_more", name: qsTr("System tray") },
         "clock": { icon: "schedule", name: qsTr("Clock") },
         "statusIcons": { icon: "wifi", name: qsTr("Status icons") },
+        "perfCpu": { icon: "memory", name: qsTr("CPU") },
+        "perfMemory": { icon: "memory_alt", name: qsTr("Memory") },
+        "perfStorage": { icon: "hard_disk", name: qsTr("Storage") },
+        "perfNetwork": { icon: "swap_vert", name: qsTr("Network") },
+        "perfGpu": { icon: "desktop_windows", name: qsTr("GPU") },
+        "perfBattery": { icon: "battery_full", name: qsTr("Battery") },
         "dock": { icon: "apps", name: qsTr("Dock") },
         "power": { icon: "power_settings_new", name: qsTr("Power menu") }
     }
