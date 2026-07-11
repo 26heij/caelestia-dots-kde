@@ -301,11 +301,26 @@ void BlobShape::updatePolish() {
     const float smoothFactor = pad;
     constexpr float minR = 2.0f;
     const bool cornerFill = m_group->cornerFill();
-    const auto rectCount = m_cachedRects.size();
+    const qsizetype rectCount = qMin(m_cachedRects.size(), qsizetype(16));
+    QVector<int> cornerExcludeMasks(rectCount, 0);
+
+    if (cornerFill) {
+        for (qsizetype i = 0; i < rectCount; ++i) {
+            BlobShape* const si = rectShapes[i];
+            for (qsizetype j = i + 1; j < rectCount; ++j) {
+                BlobShape* const sj = rectShapes[j];
+                if (si->isCornerExcluded(sj) || sj->isCornerExcluded(si)) {
+                    cornerExcludeMasks[i] |= (1 << j);
+                    cornerExcludeMasks[j] |= (1 << i);
+                }
+            }
+        }
+    }
+
     for (qsizetype i = 0; i < rectCount; ++i) {
         auto& ri = m_cachedRects[i];
         const int riExcludeMask = ri.excludeMask;
-        BlobShape* const si = rectShapes[i];
+        const int riCornerExcludeMask = cornerExcludeMasks[i];
         float fTr = 1.0f, fBr = 1.0f, fBl = 1.0f, fTl = 1.0f;
 
         const float cTrX = ri.cx + ri.hw, cTrY = ri.cy - ri.hh;
@@ -318,8 +333,7 @@ void BlobShape::updatePolish() {
                 continue;
             if (riExcludeMask & (1 << j))
                 continue;
-            BlobShape* const sj = rectShapes[j];
-            if (si->isCornerExcluded(sj) || sj->isCornerExcluded(si))
+            if (riCornerExcludeMask & (1 << j))
                 continue;
             const auto& rj = m_cachedRects[j];
             // Square each corner only near rj's edge; keep full radius far outside AND

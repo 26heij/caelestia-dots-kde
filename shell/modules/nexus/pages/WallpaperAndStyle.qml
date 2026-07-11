@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Caelestia.Components
 import Caelestia.Config
 import qs.components
@@ -215,6 +216,36 @@ PageBase {
             value: Config.background.wallpaperRecolorStrength
             enabled: Config.background.wallpaperRecolor && Config.background.wallpaperEnabled
             onMoved: v => GlobalConfig.background.wallpaperRecolorStrength = v
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            text: qsTr("Wallpaper slideshow")
+            subtext: qsTr("Automatically change wallpaper on a timer")
+            checked: Config.background.slideshowEnabled
+            onToggled: GlobalConfig.background.slideshowEnabled = checked
+            enabled: Config.background.wallpaperEnabled
+        }
+
+        SliderRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            icon: ""
+            label: qsTr("Slideshow interval")
+            valueLabel: Math.max(1, Math.round(value * 60)) + " min"
+            value: Config.background.slideshowInterval
+            enabled: Config.background.slideshowEnabled && Config.background.wallpaperEnabled
+            onMoved: v => GlobalConfig.background.slideshowInterval = v
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+            Layout.fillWidth: true
+            text: qsTr("Random order")
+            checked: Config.background.slideshowRandom
+            onToggled: GlobalConfig.background.slideshowRandom = checked
+            enabled: Config.background.slideshowEnabled && Config.background.wallpaperEnabled
         }
 
         ToggleRow {
