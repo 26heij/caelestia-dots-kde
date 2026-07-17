@@ -48,7 +48,7 @@ ctrl + alt + delete
 super + space
     caelestia shell drawers toggle launcher
 super + v
-    qs -c caelestia ipc call launcher action clipboard
+    caelestia clipboard
 super + shift + v
     qs -c caelestia ipc call launcher action emoji
 super + alt + v
